@@ -19,27 +19,44 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Contraseña', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        try {
+          if (!credentials?.username || !credentials?.password) {
+            console.error('[AUTH] Missing credentials');
+            return null;
+          }
 
-        const user = await prisma.usuario.findUnique({
-          where: { username: credentials.username },
-        });
+          console.error('[AUTH] Looking up user:', credentials.username);
+          const user = await prisma.usuario.findUnique({
+            where: { username: credentials.username },
+          });
 
-        if (!user) return null;
+          if (!user) {
+            console.error('[AUTH] User not found:', credentials.username);
+            return null;
+          }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+          console.error('[AUTH] User found, comparing password');
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
 
-        if (!isPasswordValid) return null;
+          if (!isPasswordValid) {
+            console.error('[AUTH] Invalid password for:', credentials.username);
+            return null;
+          }
 
-        return {
-          id: user.id,
-          name: user.nombre,
-          username: user.username,
-          role: user.rol,
-        };
+          console.error('[AUTH] Login successful for:', credentials.username);
+          return {
+            id: user.id,
+            name: user.nombre,
+            username: user.username,
+            role: user.rol,
+          };
+        } catch (error) {
+          console.error('[AUTH] Error in authorize:', error);
+          return null;
+        }
       },
     }),
   ],
