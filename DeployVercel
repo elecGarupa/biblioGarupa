@@ -1,0 +1,10 @@
+ Solo necesitás configurar estas variables de entorno en Vercel:
+Valor
+(la misma del .env)
+(la misma del .env)
+https://tu-app.vercel.app
+Generá una nueva con openssl rand -base64 32
+Cosas a tener en cuenta:
+NEXTAUTH_URL actualmente apunta a localhost:3000 → los callbacks de auth fallarían en producción si no lo cambiás
+NEXTAUTH_SECRET usá uno más seguro para producción
+.env está en el .gitignore? Verificá que no se suba a GitHub
