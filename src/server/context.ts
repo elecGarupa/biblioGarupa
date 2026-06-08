@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export const createContext = async (opts: FetchCreateContextFnOptions) => {
   return {
