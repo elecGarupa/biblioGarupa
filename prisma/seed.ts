@@ -4,22 +4,20 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash('Hugo@123', 10);
-  
-  const user = await prisma.usuario.upsert({
-    where: { username: 'hugo' },
-    update: {
-      password: passwordHash,
-    },
-    create: {
-      username: 'hugo',
-      password: passwordHash,
-      nombre: 'Hugo',
-      rol: 'ADMIN',
-    },
-  });
+  const users = [
+    { username: 'hugo', password: 'Hugo@123', nombre: 'Hugo' },
+    { username: 'admin', password: 'admin1234', nombre: 'Admin' },
+  ];
 
-  console.log('Usuario creado/actualizado:', user.username);
+  for (const u of users) {
+    const passwordHash = await bcrypt.hash(u.password, 10);
+    const user = await prisma.usuario.upsert({
+      where: { username: u.username },
+      update: { password: passwordHash },
+      create: { username: u.username, password: passwordHash, nombre: u.nombre, rol: 'ADMIN' },
+    });
+    console.log('Usuario creado/actualizado:', user.username);
+  }
 }
 
 main()
