@@ -12,7 +12,19 @@ import {
   ChevronRight,
   Library,
   History,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  X,
+  Hash,
+  Book,
+  User,
+  Building2,
+  Globe,
+  Tags,
+  MapPin,
+  FileText,
+  Users,
+  Calendar
 } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
 import { toast } from 'sonner';
@@ -23,6 +35,7 @@ export default function CatalogoList() {
   const [search, setSearch] = useState('');
   const [searchDebounced, setSearchDebounced] = useState('');
   const [page, setPage] = useState(1);
+  const [detalleLibro, setDetalleLibro] = useState<any>(null);
   const pageSize = 10;
   const { data, isLoading } = trpc.libros.getAll.useQuery({ search: searchDebounced, page, pageSize });
   const libros = data?.libros;
@@ -177,6 +190,13 @@ export default function CatalogoList() {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setDetalleLibro(libro)}
+                            className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-500/10 rounded-lg transition-all"
+                            title="Ver detalle"
+                          >
+                            <Eye size={16} />
+                          </button>
                           <Link
                             href={`/catalogo/${libro.id}`}
                             className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all inline-flex"
@@ -255,7 +275,149 @@ export default function CatalogoList() {
           </div>
         </div>
       </div>
+
+      {/* Modal Detalle */}
+      {detalleLibro && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setDetalleLibro(null)}>
+          <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <BookOpen size={22} className="text-indigo-600" />
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">Detalle del Libro</h3>
+              </div>
+              <button onClick={() => setDetalleLibro(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 overflow-y-auto max-h-[75vh]">
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Cover */}
+                <div className="flex-shrink-0">
+                  <div className="w-44 h-64 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg flex items-center justify-center">
+                    {detalleLibro.portadaUrl ? (
+                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || 'Portada'} className="w-full h-full object-cover" />
+                    ) : (
+                      <Book size={48} className="text-slate-300 dark:text-slate-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 space-y-5">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-1">{detalleLibro.titulo || 'Sin título'}</h2>
+                    {detalleLibro.autor && (
+                      <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <User size={14} /> {detalleLibro.autor}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {detalleLibro.isbn && (
+                      <DetailField icon={<Hash size={14} />} label="ISBN" value={detalleLibro.isbn} />
+                    )}
+                    {detalleLibro.editorial && (
+                      <DetailField icon={<Building2 size={14} />} label="Editorial" value={detalleLibro.editorial} />
+                    )}
+                    {detalleLibro.anioPublicacion && (
+                      <DetailField icon={<Calendar size={14} />} label="Año" value={detalleLibro.anioPublicacion} />
+                    )}
+                    {detalleLibro.edicion && (
+                      <DetailField icon={<FileText size={14} />} label="Edición" value={detalleLibro.edicion} />
+                    )}
+                    {detalleLibro.idioma && (
+                      <DetailField icon={<Globe size={14} />} label="Idioma" value={detalleLibro.idioma} />
+                    )}
+                    {detalleLibro.clasificacion && (
+                      <DetailField icon={<Book size={14} />} label="Clasificación" value={detalleLibro.clasificacion} />
+                    )}
+                    {detalleLibro.tipoMaterial && (
+                      <DetailField icon={<FileText size={14} />} label="Tipo" value={detalleLibro.tipoMaterial} />
+                    )}
+                    {detalleLibro.ubicacion && (
+                      <DetailField icon={<MapPin size={14} />} label="Ubicación" value={detalleLibro.ubicacion} />
+                    )}
+                    {detalleLibro.inventario && (
+                      <DetailField icon={<Hash size={14} />} label="Inventario" value={detalleLibro.inventario} />
+                    )}
+                    {detalleLibro.lugarPublicacion && (
+                      <DetailField icon={<MapPin size={14} />} label="Lugar" value={detalleLibro.lugarPublicacion} />
+                    )}
+                  </div>
+
+                  {/* Temas */}
+                  {detalleLibro.temas && (
+                    <div className="pt-2">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Tags size={12} /> Temas</p>
+                      <div className="flex flex-wrap gap-2">
+                        {detalleLibro.temas.split(',').map((t: string, i: number) => (
+                          <span key={i} className="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded-full text-xs font-bold">
+                            {t.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Stock */}
+                  <div className="flex gap-6 pt-2 border-t border-slate-100 dark:border-slate-700">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Stock</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white">{detalleLibro.cantidadEjemplares}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Disponibles</p>
+                      <p className={`text-xl font-black ${(detalleLibro as any).ejemplaresDisponibles > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {(detalleLibro as any).ejemplaresDisponibles ?? detalleLibro.cantidadEjemplares}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional fields */}
+                  {detalleLibro.descripcionFisica && (
+                    <div className="pt-2">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Descripción Física</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{detalleLibro.descripcionFisica}</p>
+                    </div>
+                  )}
+                  {detalleLibro.notaGeneral && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Nota General</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{detalleLibro.notaGeneral}</p>
+                    </div>
+                  )}
+                  {detalleLibro.colaboradores && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Users size={12} /> Colaboradores</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{detalleLibro.colaboradores}</p>
+                    </div>
+                  )}
+                  {detalleLibro.descriptores && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Descriptores</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">{detalleLibro.descriptores}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
+  );
+}
+
+function DetailField({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
+      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1">{icon} {label}</p>
+      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{value}</p>
+    </div>
   );
 }
 

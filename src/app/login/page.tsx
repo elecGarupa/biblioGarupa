@@ -76,6 +76,7 @@ export default function LoginPage() {
               className="w-full bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 rounded-2xl py-4 px-5 outline-none transition-all text-slate-800 dark:text-slate-200 font-bold shadow-inner"
               placeholder="Ingrese su usuario"
               required
+              autoFocus
             />
           </div>
 
