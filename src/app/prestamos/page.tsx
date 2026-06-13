@@ -30,13 +30,14 @@ export default function PrestamosPage() {
   const [selectedLibro, setSelectedLibro] = useState<any>(null);
   const [diasPrestamo, setDiasPrestamo] = useState(7);
   const [historySearch, setHistorySearch] = useState('');
-  const [estadoFiltro, setEstadoFiltro] = useState<string | undefined>(undefined);
+  const [filtroActivo, setFiltroActivo] = useState<string>('todos');
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const { data: sociosFound, isFetching: buscandoSocio } = trpc.socios.getAll.useQuery({ search: socioSearch }, { enabled: socioSearch.length > 2 });
   const { data: librosFound, isFetching: buscandoLibro } = trpc.libros.buscar.useQuery({ q: libroSearch }, { enabled: libroSearch.length > 2 });
-  const { data: prestamosData, isFetching: buscandoHistorial } = trpc.circulacion.getAll.useQuery({ search: historySearch || undefined, estado: estadoFiltro as 'PRESTADO' | 'DEVUELTO' | undefined, page, pageSize });
+  const filtroEstado = filtroActivo === 'todos' ? undefined : filtroActivo === 'PRESTADO' ? { estado: 'PRESTADO' as const } : filtroActivo === 'DEVUELTO' ? { estado: 'DEVUELTO' as const } : { vencidos: true };
+  const { data: prestamosData, isFetching: buscandoHistorial } = trpc.circulacion.getAll.useQuery({ search: historySearch || undefined, ...filtroEstado, page, pageSize });
   const prestamos = prestamosData?.prestamos as any[] | undefined;
   const total = prestamosData?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -312,15 +313,16 @@ export default function PrestamosPage() {
             </div>
             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-100 dark:border-slate-700">
               {[
-                { label: 'Todos', value: undefined },
+                { label: 'Todos', value: 'todos' },
                 { label: 'Activos', value: 'PRESTADO' },
+                { label: 'Vencidos', value: 'vencidos' },
                 { label: 'Devueltos', value: 'DEVUELTO' },
               ].map((f) => (
                 <button
-                  key={f.label}
-                  onClick={() => { setEstadoFiltro(f.value); setPage(1); }}
+                  key={f.value}
+                  onClick={() => { setFiltroActivo(f.value); setPage(1); }}
                   className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-                    estadoFiltro === f.value
+                    filtroActivo === f.value
                       ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}

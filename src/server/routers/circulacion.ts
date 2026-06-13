@@ -22,6 +22,7 @@ export const circulacionRouter = router({
     .input(z.object({ 
       search: z.string().optional(),
       estado: z.enum(['PRESTADO', 'DEVUELTO']).optional(),
+      vencidos: z.boolean().optional(),
       page: z.number().optional().default(1),
       pageSize: z.number().optional().default(10),
     }).optional())
@@ -32,6 +33,10 @@ export const circulacionRouter = router({
 
       const where: any = {};
       if (input?.estado) where.estado = input.estado;
+      if (input?.vencidos) {
+        where.estado = 'PRESTADO';
+        where.fechaDevolucionPrevista = { lt: new Date() };
+      }
       if (input?.search) {
         where.OR = [
           { socio: { nombre: { contains: input.search, mode: 'insensitive' } } },
