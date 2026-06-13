@@ -116,10 +116,10 @@ export default function LoginPage() {
         <div className="mt-8 text-center">
           <a
             href="/consulta-publica"
-            className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 font-black text-sm transition-all border border-indigo-200 dark:border-indigo-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97]"
           >
-            <Search size={16} />
-            Consultar catálogo público
+            <Search size={18} />
+            Consultar Catálogo Público
           </a>
         </div>
 
