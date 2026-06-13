@@ -32,10 +32,14 @@ export const circulacionRouter = router({
       const skip = (page - 1) * pageSize;
 
       const where: any = {};
-      if (input?.estado) where.estado = input.estado;
       if (input?.vencidos) {
         where.estado = 'PRESTADO';
         where.fechaDevolucionPrevista = { lt: new Date() };
+      } else if (input?.estado) {
+        where.estado = input.estado;
+        if (input.estado === 'PRESTADO') {
+          where.fechaDevolucionPrevista = { gte: new Date() };
+        }
       }
       if (input?.search) {
         where.OR = [
