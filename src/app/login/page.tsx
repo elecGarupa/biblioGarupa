@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Library, Eye, EyeOff } from 'lucide-react';
+import { Library, Eye, EyeOff, Search } from 'lucide-react';
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
@@ -113,7 +113,17 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-12 text-center text-slate-400 dark:text-slate-500 text-xs font-bold italic">
+        <div className="mt-8 text-center">
+          <a
+            href="/consulta-publica"
+            className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+          >
+            <Search size={16} />
+            Consultar catálogo público
+          </a>
+        </div>
+
+        <p className="mt-8 text-center text-slate-400 dark:text-slate-500 text-xs font-bold italic">
           &ldquo;La biblioteca es el corazón de la comunidad.&rdquo;
         </p>
       </div>
