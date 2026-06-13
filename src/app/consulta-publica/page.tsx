@@ -44,7 +44,7 @@ export default function ConsultaPublica() {
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl rotate-3 overflow-hidden flex items-center justify-center p-1">
-              <img src="/logo.jpg" alt="BiblioGarupa" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="BiblioGarupa" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight">BiblioGarupa</h1>
