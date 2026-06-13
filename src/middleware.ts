@@ -8,6 +8,6 @@ export default withAuth({
 
 export const config = {
   matcher: [
-    "/((?!consulta-publica|login|api/auth|api/debug|_next/static|_next/image|favicon.ico).*)",
+    "/((?!consulta-publica|login|api/auth|api/trpc|api/debug|_next/static|_next/image|favicon.ico).*)",
   ],
 };
