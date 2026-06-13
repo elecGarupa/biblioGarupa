@@ -9,6 +9,9 @@ const plusJakarta = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-pl
 export const metadata: Metadata = {
   title: 'BiblioGarupa - Gestión de Biblioteca',
   description: 'Sistema comunitario de gestión bibliotecaria',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
