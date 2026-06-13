@@ -28,8 +28,8 @@ export function Sidebar() {
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 flex flex-col p-4 gap-2 z-50">
       <div className="flex items-center gap-3 px-2 py-6 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30">
-          <Library size={22} />
+        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30 overflow-hidden p-0.5">
+          <img src="/logo.jpg" alt="BiblioGarupa" className="w-full h-full object-contain" />
         </div>
         <div>
           <h1 className="text-xl font-black text-indigo-600 tracking-tighter leading-tight">BiblioGarupa</h1>
