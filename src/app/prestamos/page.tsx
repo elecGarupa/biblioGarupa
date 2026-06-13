@@ -30,12 +30,13 @@ export default function PrestamosPage() {
   const [selectedLibro, setSelectedLibro] = useState<any>(null);
   const [diasPrestamo, setDiasPrestamo] = useState(7);
   const [historySearch, setHistorySearch] = useState('');
+  const [estadoFiltro, setEstadoFiltro] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const { data: sociosFound, isFetching: buscandoSocio } = trpc.socios.getAll.useQuery({ search: socioSearch }, { enabled: socioSearch.length > 2 });
   const { data: librosFound, isFetching: buscandoLibro } = trpc.libros.buscar.useQuery({ q: libroSearch }, { enabled: libroSearch.length > 2 });
-  const { data: prestamosData, isFetching: buscandoHistorial } = trpc.circulacion.getAll.useQuery({ search: historySearch || undefined, page, pageSize });
+  const { data: prestamosData, isFetching: buscandoHistorial } = trpc.circulacion.getAll.useQuery({ search: historySearch || undefined, estado: estadoFiltro as 'PRESTADO' | 'DEVUELTO' | undefined, page, pageSize });
   const prestamos = prestamosData?.prestamos as any[] | undefined;
   const total = prestamosData?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -298,8 +299,8 @@ export default function PrestamosPage() {
           <h3 className="text-xl font-black text-slate-900 dark:text-white font-display">Historial de Préstamos</h3>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-            <div className="relative max-w-sm">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="relative max-w-sm flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
@@ -308,6 +309,25 @@ export default function PrestamosPage() {
                 onChange={(e) => { setHistorySearch(e.target.value); setPage(1); }}
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm text-slate-700 dark:text-slate-300"
               />
+            </div>
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-100 dark:border-slate-700">
+              {[
+                { label: 'Todos', value: undefined },
+                { label: 'Activos', value: 'PRESTADO' },
+                { label: 'Devueltos', value: 'DEVUELTO' },
+              ].map((f) => (
+                <button
+                  key={f.label}
+                  onClick={() => { setEstadoFiltro(f.value); setPage(1); }}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                    estadoFiltro === f.value
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
           </div>
           <div className="overflow-x-auto">
