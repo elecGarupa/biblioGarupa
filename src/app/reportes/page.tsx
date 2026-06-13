@@ -394,18 +394,18 @@ export default function ReportesPage() {
     },
     {
       id: 'comparativa',
-      title: 'Préstamos: Activos vs Devueltos',
+      title: 'Préstamos: Activos vs En Mora',
       icon: <BarChartIcon className="text-indigo-600" size={24} />,
-      description: 'Comparativa general',
+      description: 'Comparativa de estado actual',
       content: data && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-center">
           <div className="h-56">
             <Doughnut
               data={{
-                labels: ['Activos', 'Devueltos'],
+                labels: ['Activos', 'En mora'],
                 datasets: [{
-                  data: [data.prestamosActivosVsDevueltos.activos, data.prestamosActivosVsDevueltos.devueltos],
-                  backgroundColor: ['#6366f1', '#22c55e'],
+                  data: [data.prestamosActivosVsDevueltos.activos, data.prestamosActivosVsDevueltos.enMora],
+                  backgroundColor: ['#6366f1', '#ef4444'],
                   borderWidth: 0,
                 }],
               }}
@@ -428,10 +428,10 @@ export default function ReportesPage() {
                 {data.prestamosActivosVsDevueltos.activos}
               </p>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl p-6">
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Devueltos</p>
-              <p className="text-4xl font-black text-emerald-700 dark:text-emerald-300 mt-1">
-                {data.prestamosActivosVsDevueltos.devueltos}
+            <div className="bg-rose-50 dark:bg-rose-500/10 rounded-2xl p-6">
+              <p className="text-sm font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">En mora</p>
+              <p className="text-4xl font-black text-rose-700 dark:text-rose-300 mt-1">
+                {data.prestamosActivosVsDevueltos.enMora}
               </p>
             </div>
           </div>

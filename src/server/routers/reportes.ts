@@ -182,8 +182,11 @@ export const reportesRouter = router({
 
       const activos = prestamosCount.find((p) => p.estado === 'PRESTADO');
       const devueltos = prestamosCount.find((p) => p.estado === 'DEVUELTO');
+      const totalActivos = activos?._count ?? 0;
+      const enMora = prestamosVencidos.length;
       const prestamosActivosVsDevueltos = {
-        activos: activos?._count ?? 0,
+        activos: totalActivos - enMora,
+        enMora,
         devueltos: devueltos?._count ?? 0,
       };
 
