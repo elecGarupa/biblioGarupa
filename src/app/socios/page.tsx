@@ -12,6 +12,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
 import Link from 'next/link';
@@ -44,8 +45,13 @@ export default function SociosList() {
                 placeholder="Buscar socios..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 rounded-xl py-3 pl-12 pr-4 outline-none transition-all font-semibold text-sm text-slate-700 dark:text-slate-300"
+                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 rounded-xl py-3 pl-12 pr-10 outline-none transition-all font-semibold text-sm text-slate-700 dark:text-slate-300"
               />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                  <X size={14} className="text-slate-400 dark:text-slate-500" />
+                </button>
+              )}
             </div>
           </div>
           <Link 

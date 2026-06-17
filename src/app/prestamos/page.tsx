@@ -14,6 +14,7 @@ import {
   History,
   BookMarked,
   Loader2,
+  X,
   XCircle,
   BookCheck,
   ChevronLeft,
@@ -104,8 +105,13 @@ export default function PrestamosPage() {
                   placeholder="Buscar por DNI o Nombre..."
                   value={socioSearch}
                   onChange={(e) => setSocioSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
+                  className="w-full pl-12 pr-10 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
                 />
+                {socioSearch && (
+                  <button onClick={() => setSocioSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                    <X size={14} className="text-slate-400 dark:text-slate-500" />
+                  </button>
+                )}
                 
                 {socioSearch.length > 2 && !selectedSocio && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto overflow-x-hidden">
@@ -169,8 +175,13 @@ export default function PrestamosPage() {
                   placeholder="Escanear ISBN o buscar título..."
                   value={libroSearch}
                   onChange={(e) => setLibroSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
+                  className="w-full pl-12 pr-10 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
                 />
+                {libroSearch && (
+                  <button onClick={() => setLibroSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                    <X size={14} className="text-slate-400 dark:text-slate-500" />
+                  </button>
+                )}
 
                 {libroSearch.length > 2 && !selectedLibro && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-2xl z-20 max-h-60 overflow-y-auto">
@@ -310,8 +321,13 @@ export default function PrestamosPage() {
                 placeholder="Filtrar por socio o libro..."
                 value={historySearch}
                 onChange={(e) => { setHistorySearch(e.target.value); setPage(1); }}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm text-slate-700 dark:text-slate-300"
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm text-slate-700 dark:text-slate-300"
               />
+              {historySearch && (
+                <button onClick={() => { setHistorySearch(''); setPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                  <X size={14} className="text-slate-400 dark:text-slate-500" />
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-1 border border-slate-100 dark:border-slate-700">
               {[
