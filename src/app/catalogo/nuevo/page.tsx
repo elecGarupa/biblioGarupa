@@ -126,11 +126,11 @@ export default function NuevoLibro() {
   const coverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const name = session?.user?.name;
-    if (name && !formData.bibliotecario) {
-      setFormData(prev => ({ ...prev, bibliotecario: name }));
+    const nombreCompleto = (session?.user as any)?.nombreCompleto;
+    if (nombreCompleto && !formData.bibliotecario) {
+      setFormData(prev => ({ ...prev, bibliotecario: nombreCompleto }));
     }
-  }, [session?.user?.name]);
+  }, [(session?.user as any)?.nombreCompleto]);
 
   const createLibro = trpc.libros.create.useMutation({
     onSuccess: () => {
