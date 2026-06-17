@@ -276,10 +276,8 @@ export default function NuevoLibro() {
                   </div>
                   {/* Preview grande en hover */}
                   {hoverCover && formData.portadaUrl && (
-                    <div className="absolute left-full top-0 ml-6 z-50 pointer-events-none">
-                      <div className="w-72 h-96 rounded-2xl overflow-hidden shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] border-2 border-slate-200 bg-white">
-                        <img src={formData.portadaUrl} alt="Portada preview" className="w-full h-full object-cover" />
-                      </div>
+                    <div className="absolute left-full top-0 ml-6 z-[999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200">
+                      <img src={formData.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-cover block" />
                     </div>
                   )}
                   <div className="text-center mt-4">
