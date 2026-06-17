@@ -130,6 +130,7 @@ export default function NuevoLibro() {
 
   const searchExternal = trpc.libros.getByIsbnExternal.useMutation({
     onSuccess: (data) => {
+      setIsSearching(false);
       if (data) {
         toast.success('Datos autocompletados desde ISBN', { duration: 3000 });
         setFormData(prev => ({
@@ -151,6 +152,7 @@ export default function NuevoLibro() {
       }
     },
     onError: (error) => {
+      setIsSearching(false);
       toast.error(error.message, { duration: 4000 });
     }
   });

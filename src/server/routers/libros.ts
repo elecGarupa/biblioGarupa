@@ -159,7 +159,7 @@ export const librosRouter = router({
       let found = false;
       // 1. Google Books API
       try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${buildQuery()}&maxResults=10`);
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${buildQuery()}&maxResults=10&projection=full`);
         if (response.ok) {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
