@@ -161,13 +161,12 @@ export const librosRouter = router({
       try {
         const query = buildQuery().replace(/ /g, '+');
         const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&projection=full`;
-        console.log('[DEBUG] Google Books URL:', url);
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
             found = true;
-            const results = data.items.map((item: any) => {
+            return data.items.map((item: any) => {
               const info = item.volumeInfo;
               const isbn = info.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13' || i.type === 'ISBN_10')?.identifier || '';
               return {
@@ -181,11 +180,7 @@ export const librosRouter = router({
                 idioma: info.language || '',
               };
             });
-            console.log('[DEBUG] searchExternalByTitle - primer resultado:', JSON.stringify(results[0], null, 2));
-            return results;
           }
-        } else {
-          console.warn(`Google Books API devolvió status ${response.status}`);
         }
       } catch (error: any) {
         console.error('Error al consultar Google Books API:', error?.message || error);
@@ -224,14 +219,12 @@ export const librosRouter = router({
       if (input.id.startsWith('/works/')) {
         try {
           const editionsUrl = `https://openlibrary.org${input.id}/editions.json?limit=1`;
-          console.log('[DEBUG] OpenLibrary editions URL:', editionsUrl);
           const editionRes = await fetch(editionsUrl);
           if (editionRes.ok) {
             const editionData = await editionRes.json();
             const edition = editionData.entries?.[0];
             if (edition) {
               const isbn = edition.isbn_13?.[0] || edition.isbn_10?.[0] || '';
-              console.log('[DEBUG] OpenLibrary edition found, isbn:', isbn);
               return {
                 isbn,
                 titulo: edition.title || '',

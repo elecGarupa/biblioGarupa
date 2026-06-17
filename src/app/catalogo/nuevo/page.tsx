@@ -161,7 +161,6 @@ export default function NuevoLibro() {
     onSuccess: (data) => {
       setIsSearching(false);
       if (data && data.length > 0) {
-        console.log('[DEBUG] Resultados de búsqueda:', JSON.stringify(data.slice(0, 2), null, 2));
         setSearchResults(data);
         setShowModal(true);
       } else {
@@ -176,66 +175,57 @@ export default function NuevoLibro() {
 
   const fetchExternalDetails = trpc.libros.getByExternalId.useMutation({
     onSuccess: (data) => {
-      console.log('[DEBUG] fetchExternalDetails onSuccess:', JSON.stringify(data, null, 2));
       if (data) {
-        setFormData(prev => {
-          const nuevo = {
-            ...prev,
-            titulo: data.titulo || prev.titulo,
-            autor: data.autor || prev.autor,
-            colaboradores: data.colaboradores || prev.colaboradores,
-            anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
-            editorial: data.editorial || prev.editorial,
-            lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
-            edicion: data.edicion || prev.edicion,
-            portadaUrl: data.portadaUrl || prev.portadaUrl,
-            descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
-            idioma: data.idioma || prev.idioma,
-            temas: data.temas || prev.temas,
-            isbn: data.isbn || prev.isbn,
-          };
-          console.log('[DEBUG] fetchExternalDetails - formData actualizado:', JSON.stringify({ isbn: nuevo.isbn, titulo: nuevo.titulo }, null, 2));
-          return nuevo;
-        });
+        setFormData(prev => ({
+          ...prev,
+          titulo: data.titulo || prev.titulo,
+          autor: data.autor || prev.autor,
+          colaboradores: data.colaboradores || prev.colaboradores,
+          anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
+          editorial: data.editorial || prev.editorial,
+          lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
+          edicion: data.edicion || prev.edicion,
+          portadaUrl: data.portadaUrl || prev.portadaUrl,
+          descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
+          idioma: data.idioma || prev.idioma,
+          temas: data.temas || prev.temas,
+          isbn: data.isbn || prev.isbn,
+        }));
       }
     },
-    onError: (err) => {
-      console.error('[DEBUG] fetchExternalDetails onError:', err);
-    },
+    onError: () => {},
   });
 
   const handleSearch = () => {
-    if (formData.isbn.length >= 10) {
-      setIsSearching(true);
-      searchExternal.mutate({ isbn: formData.isbn });
-    } else if (searchQuery.titulo.length >= 3) {
+    if (searchQuery.titulo.length >= 3) {
       setIsSearching(true);
       searchByTitle.mutate({ titulo: searchQuery.titulo, autor: searchQuery.autor });
+    } else if (formData.isbn.length >= 10) {
+      setIsSearching(true);
+      searchExternal.mutate({ isbn: formData.isbn });
     } else {
       toast.error('Ingrese un ISBN (10+ dígitos) o un título (3+ caracteres) para buscar.');
     }
   };
 
   const selectSearchResult = (book: any) => {
-    console.log('[DEBUG] selectSearchResult - book recibido:', JSON.stringify(book, null, 2));
     setShowModal(false);
-    const prevIsbn = formData.isbn;
-    setFormData(prev => {
-      const nuevo = {
-        ...prev,
-        titulo: book.titulo || prev.titulo,
-        autor: book.autor || prev.autor,
-        anioPublicacion: book.anioPublicacion || prev.anioPublicacion,
-        editorial: book.editorial || prev.editorial,
-        idioma: book.idioma || prev.idioma,
-        portadaUrl: book.portadaUrl || prev.portadaUrl,
-        isbn: book.isbn || prev.isbn,
-      };
-      console.log('[DEBUG] selectSearchResult - prev.isbn:', prev.isbn, 'book.isbn:', book.isbn, 'nuevo.isbn:', nuevo.isbn);
-      return nuevo;
-    });
+    setFormData(prev => ({
+      ...prev,
+      isbn: book.isbn || prev.isbn,
+      titulo: book.titulo || prev.titulo,
+      autor: book.autor || prev.autor,
+      colaboradores: book.colaboradores || prev.colaboradores,
+      anioPublicacion: book.anioPublicacion || prev.anioPublicacion,
+      editorial: book.editorial || prev.editorial,
+      lugarPublicacion: book.lugarPublicacion || prev.lugarPublicacion,
+      edicion: book.edicion || prev.edicion,
+      portadaUrl: book.portadaUrl || prev.portadaUrl,
+      descripcionFisica: book.descripcionFisica || prev.descripcionFisica,
+      idioma: book.idioma || prev.idioma,
+      temas: book.temas || prev.temas,
+    }));
     if (book.id) {
-      console.log('[DEBUG] selectSearchResult - llamando fetchExternalDetails con id:', book.id);
       fetchExternalDetails.mutate({ id: book.id });
     }
     toast.success(`"${book.titulo}" seleccionado`, { duration: 3000 });
