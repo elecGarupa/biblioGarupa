@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   Book, 
@@ -119,6 +120,8 @@ export default function NuevoLibro() {
   const [showModal, setShowModal] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hoverCover, setHoverCover] = useState(false);
+  const [coverRect, setCoverRect] = useState({ left: 0, top: 0, right: 0 });
+  const coverRef = useRef<HTMLDivElement>(null);
 
   const createLibro = trpc.libros.create.useMutation({
     onSuccess: () => {
@@ -262,9 +265,16 @@ export default function NuevoLibro() {
             <div className="flex flex-col md:flex-row gap-16">
               {/* Left: Book Cover Placeholder */}
               <div className="flex flex-col items-center gap-6 w-full md:w-1/4 md:border-r border-slate-100 dark:border-slate-700 md:pr-12">
-                <div 
+                <div
+                  ref={coverRef}
                   className="relative group sticky top-8"
-                  onMouseEnter={() => setHoverCover(true)}
+                  onMouseEnter={() => {
+                    if (coverRef.current) {
+                      const r = coverRef.current.getBoundingClientRect();
+                      setCoverRect({ left: r.left, top: r.top, right: r.right });
+                    }
+                    setHoverCover(true);
+                  }}
                   onMouseLeave={() => setHoverCover(false)}
                 >
                   <div className="w-48 h-64 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border-4 border-dashed border-slate-200 dark:border-slate-600 overflow-hidden transition-all group-hover:border-indigo-300 group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-500/10 shadow-inner cursor-pointer">
@@ -275,10 +285,14 @@ export default function NuevoLibro() {
                     )}
                   </div>
                   {/* Preview grande en hover */}
-                  {hoverCover && formData.portadaUrl && (
-                    <div className="absolute left-full top-0 ml-6 z-[999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200">
+                  {typeof document !== 'undefined' && hoverCover && formData.portadaUrl && createPortal(
+                    <div
+                      className="fixed z-[9999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200"
+                      style={{ left: coverRect.right + 24, top: coverRect.top }}
+                    >
                       <img src={formData.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-cover block" />
-                    </div>
+                    </div>,
+                    document.body
                   )}
                   <div className="text-center mt-4">
                     <p className="text-xl font-black text-slate-800 dark:text-slate-200 font-display">Portada</p>
