@@ -305,6 +305,11 @@ export default function NuevoLibro() {
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
                           />
+                          {formData.isbn && (
+                            <button type="button" onClick={() => setFormData(prev => ({ ...prev, isbn: '' }))} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                              <X size={14} className="text-slate-400 dark:text-slate-500" />
+                            </button>
+                          )}
                         </div>
                         <div className="relative">
                           <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
@@ -316,6 +321,11 @@ export default function NuevoLibro() {
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
                           />
+                          {searchQuery.titulo && (
+                            <button type="button" onClick={() => setSearchQuery(prev => ({ ...prev, titulo: '' }))} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                              <X size={14} className="text-slate-400 dark:text-slate-500" />
+                            </button>
+                          )}
                         </div>
                         <div className="relative">
                           <BadgeCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
@@ -327,6 +337,11 @@ export default function NuevoLibro() {
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
                           />
+                          {searchQuery.autor && (
+                            <button type="button" onClick={() => setSearchQuery(prev => ({ ...prev, autor: '' }))} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                              <X size={14} className="text-slate-400 dark:text-slate-500" />
+                            </button>
+                          )}
                         </div>
                         <button
                           type="button"
