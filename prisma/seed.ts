@@ -11,6 +11,7 @@ async function main() {
     { username: 'olga', password: 'Olg789', nombre: 'Olga' },
     { username: 'tamara', password: 'Tam159', nombre: 'Tamara' },
     { username: 'lissi', password: 'Lis321', nombre: 'Lissi' },
+    { username: 'ester', password: 'Est654', nombre: 'Ester' },
   ];
 
   for (const u of users) {
