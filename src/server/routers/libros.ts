@@ -162,7 +162,7 @@ export const librosRouter = router({
         const query = buildQuery().replace(/ /g, '+');
         const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&projection=full`;
         console.log('[DEBUG] Google Books URL:', url);
-        const response = await fetch(encodeURI(url));
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
