@@ -159,7 +159,10 @@ export const librosRouter = router({
       let found = false;
       // 1. Google Books API
       try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${buildQuery()}&maxResults=10&projection=full`);
+        const query = buildQuery().replace(/ /g, '+');
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&projection=full`;
+        console.log('[DEBUG] Google Books URL:', url);
+        const response = await fetch(encodeURI(url));
         if (response.ok) {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
@@ -218,6 +221,38 @@ export const librosRouter = router({
   getByExternalId: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
+      if (input.id.startsWith('/works/')) {
+        try {
+          const editionsUrl = `https://openlibrary.org${input.id}/editions.json?limit=1`;
+          console.log('[DEBUG] OpenLibrary editions URL:', editionsUrl);
+          const editionRes = await fetch(editionsUrl);
+          if (editionRes.ok) {
+            const editionData = await editionRes.json();
+            const edition = editionData.entries?.[0];
+            if (edition) {
+              const isbn = edition.isbn_13?.[0] || edition.isbn_10?.[0] || '';
+              console.log('[DEBUG] OpenLibrary edition found, isbn:', isbn);
+              return {
+                isbn,
+                titulo: edition.title || '',
+                autor: (edition.authors || []).map((a: any) => a.name).join(', '),
+                colaboradores: '',
+                anioPublicacion: edition.publish_date?.match(/\d{4}/)?.[0] || '',
+                editorial: (edition.publishers || []).join(', '),
+                lugarPublicacion: (edition.publish_places || []).join(', '),
+                edicion: '',
+                portadaUrl: edition.cover?.large || edition.cover?.medium || edition.cover?.small || '',
+                descripcionFisica: edition.number_of_pages ? `${edition.number_of_pages} p.` : '',
+                idioma: edition.languages?.[0]?.key?.replace('/languages/', '') || '',
+                temas: (edition.subjects || []).join(', '),
+              };
+            }
+          }
+        } catch (error: any) {
+          console.error('Error al consultar OpenLibrary editions:', error?.message || error);
+        }
+        return null;
+      }
       try {
         const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${input.id}`);
         if (response.ok) {
