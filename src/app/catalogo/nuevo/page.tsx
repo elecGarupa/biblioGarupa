@@ -171,6 +171,29 @@ export default function NuevoLibro() {
     }
   });
 
+  const fetchExternalDetails = trpc.libros.getByExternalId.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          titulo: data.titulo || prev.titulo,
+          autor: data.autor || prev.autor,
+          colaboradores: data.colaboradores || prev.colaboradores,
+          anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
+          editorial: data.editorial || prev.editorial,
+          lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
+          edicion: data.edicion || prev.edicion,
+          portadaUrl: data.portadaUrl || prev.portadaUrl,
+          descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
+          idioma: data.idioma || prev.idioma,
+          temas: data.temas || prev.temas,
+          isbn: data.isbn || prev.isbn,
+        }));
+      }
+    },
+    onError: () => {},
+  });
+
   const handleSearch = () => {
     if (formData.isbn.length >= 10) {
       setIsSearching(true);
@@ -195,6 +218,9 @@ export default function NuevoLibro() {
       portadaUrl: book.portadaUrl || prev.portadaUrl,
       isbn: book.isbn || prev.isbn,
     }));
+    if (book.id) {
+      fetchExternalDetails.mutate({ id: book.id });
+    }
     toast.success(`"${book.titulo}" seleccionado`, { duration: 3000 });
   };
 

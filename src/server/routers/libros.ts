@@ -213,6 +213,36 @@ export const librosRouter = router({
       return [];
     }),
 
+  getByExternalId: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${input.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          const info = data.volumeInfo;
+          const isbn = info.industryIdentifiers?.find((i: any) => i.type === 'ISBN_13' || i.type === 'ISBN_10')?.identifier || '';
+          return {
+            isbn,
+            titulo: info.title + (info.subtitle ? `: ${info.subtitle}` : ''),
+            autor: info.authors?.[0] || '',
+            colaboradores: info.authors?.slice(1).join(', ') || '',
+            anioPublicacion: info.publishedDate?.split('-')[0] || '',
+            editorial: info.publisher || '',
+            lugarPublicacion: '',
+            edicion: '',
+            portadaUrl: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
+            descripcionFisica: info.pageCount ? `${info.pageCount} p.` : '',
+            idioma: info.language || '',
+            temas: info.categories?.join(', ') || '',
+          };
+        }
+      } catch (error: any) {
+        console.error('Error al consultar Google Books API por ID:', error?.message || error);
+      }
+      return null;
+    }),
+
   getByIsbnExternal: publicProcedure
     .input(z.object({ isbn: z.string() }))
     .mutation(async ({ input }) => {
