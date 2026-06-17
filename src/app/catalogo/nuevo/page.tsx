@@ -86,6 +86,7 @@ function FormSection({ title, children }: { title: string; children: React.React
 }
 
 const inputClasses = "w-full pl-12 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:border-indigo-500 outline-none transition-all text-slate-700 dark:text-slate-300 font-semibold";
+const searchInputClasses = inputClasses + " pr-10";
 const textareaClasses = "w-full pl-12 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:border-indigo-500 outline-none transition-all text-slate-700 dark:text-slate-300 font-semibold resize-none";
 
 export default function NuevoLibro() {
@@ -300,7 +301,7 @@ export default function NuevoLibro() {
                             name="isbn"
                             value={formData.isbn}
                             onChange={handleChange}
-                            className={inputClasses + " text-sm"}
+                            className={searchInputClasses + " text-sm"}
                             placeholder="ISBN"
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
@@ -316,7 +317,7 @@ export default function NuevoLibro() {
                           <input
                             value={searchQuery.titulo}
                             onChange={e => setSearchQuery(prev => ({ ...prev, titulo: e.target.value }))}
-                            className={inputClasses + " text-sm"}
+                            className={searchInputClasses + " text-sm"}
                             placeholder="Título"
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
@@ -332,7 +333,7 @@ export default function NuevoLibro() {
                           <input
                             value={searchQuery.autor}
                             onChange={e => setSearchQuery(prev => ({ ...prev, autor: e.target.value }))}
-                            className={inputClasses + " text-sm"}
+                            className={searchInputClasses + " text-sm"}
                             placeholder="Autor (opcional)"
                             type="text"
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
