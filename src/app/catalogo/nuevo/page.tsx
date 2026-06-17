@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useSession } from 'next-auth/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   Book, 
@@ -92,6 +93,7 @@ const textareaClasses = "w-full pl-12 py-3.5 bg-slate-50 dark:bg-slate-800/50 bo
 
 export default function NuevoLibro() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     isbn: '',
     idioma: '',
@@ -122,6 +124,13 @@ export default function NuevoLibro() {
   const [hoverCover, setHoverCover] = useState(false);
   const [coverRect, setCoverRect] = useState({ left: 0, top: 0, right: 0 });
   const coverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const name = session?.user?.name;
+    if (name && !formData.bibliotecario) {
+      setFormData(prev => ({ ...prev, bibliotecario: name }));
+    }
+  }, [session?.user?.name]);
 
   const createLibro = trpc.libros.create.useMutation({
     onSuccess: () => {
