@@ -52,7 +52,6 @@ export const authOptions: NextAuthOptions = {
             name: user.nombre,
             username: user.username,
             role: user.rol,
-            nombreCompleto: user.nombreCompleto,
           };
         } catch (error) {
           console.error('[AUTH] Error in authorize:', error);
@@ -66,7 +65,6 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
-        token.nombreCompleto = (user as any).nombreCompleto;
       }
       return token;
     },
@@ -74,7 +72,6 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
-        (session.user as any).nombreCompleto = token.nombreCompleto;
       }
       return session;
     },
