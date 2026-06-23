@@ -28,12 +28,16 @@ import {
   Users,
   StickyNote,
   Layers,
+  Plus,
+  Library,
 } from 'lucide-react';
 export default function LibroDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const utils = trpc.useUtils();
   const [isEditing, setIsEditing] = useState(false);
+  const [showAddEjemplar, setShowAddEjemplar] = useState(false);
+  const [nuevoEj, setNuevoEj] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
   const { data: libro, isLoading } = trpc.libros.getById.useQuery({ id });
 
   const [form, setForm] = useState({
@@ -52,7 +56,7 @@ export default function LibroDetail() {
     temas: '',
     descriptores: '',
     colaboradores: '',
-    cantidadEjemplares: 1,
+    codigoEstante: '',
   });
 
   const updateLibro = trpc.libros.update.useMutation({
@@ -61,6 +65,19 @@ export default function LibroDetail() {
       setIsEditing(false);
       utils.libros.getById.invalidate({ id });
       utils.libros.getAll.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
+
+  const addEjemplar = trpc.libros.addEjemplares.useMutation({
+    onSuccess: () => {
+      toast.success('Ejemplar agregado', { duration: 3000 });
+      utils.libros.getById.invalidate({ id });
+      utils.libros.getAll.invalidate();
+      setShowAddEjemplar(false);
+      setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
     },
     onError: (error) => {
       toast.error(error.message, { duration: 4000 });
@@ -85,7 +102,7 @@ export default function LibroDetail() {
       temas: libro.temas || '',
       descriptores: libro.descriptores || '',
       colaboradores: libro.colaboradores || '',
-      cantidadEjemplares: libro.cantidadEjemplares,
+      codigoEstante: libro.codigoEstante || '',
     });
     setIsEditing(true);
   };
@@ -190,7 +207,7 @@ export default function LibroDetail() {
                     <EditField icon={<User size={18} />} label="Autor" value={form.autor} onChange={(v) => setForm(f => ({ ...f, autor: v }))} />
                     <EditField icon={<Building2 size={18} />} label="Autor Institucional" value={form.autorInstitucional} onChange={(v) => setForm(f => ({ ...f, autorInstitucional: v }))} />
                     <EditField icon={<BookCopy size={18} />} label="Edición" value={form.edicion} onChange={(v) => setForm(f => ({ ...f, edicion: v }))} />
-                    <EditNumericField icon={<Layers size={18} />} label="Ejemplares" value={form.cantidadEjemplares} onChange={(v) => setForm(f => ({ ...f, cantidadEjemplares: v }))} />
+                    <EditField icon={<MapPin size={18} />} label="Estante / Detalles" value={form.codigoEstante} onChange={(v) => setForm(f => ({ ...f, codigoEstante: v }))} />
                   </>
                 ) : (
                   <>
@@ -201,7 +218,18 @@ export default function LibroDetail() {
                     <InfoRow icon={<User size={18} />} label="Autor" value={libro.autor || '—'} />
                     <InfoRow icon={<Building2 size={18} />} label="Autor Institucional" value={libro.autorInstitucional || '—'} />
                     <InfoRow icon={<BookCopy size={18} />} label="Edición" value={libro.edicion || '—'} />
-                    <InfoRow icon={<Layers size={18} />} label="Ejemplares" value={String(libro.cantidadEjemplares)} />
+                    {libro.codigoEstante && <InfoRow icon={<MapPin size={18} />} label="Estante" value={libro.codigoEstante} />}
+                      <InfoRow icon={<Layers size={18} />} label="Ejemplares" value={String(libro.cantidadEjemplares)} />
+                      <div className="flex items-center gap-3 pt-2">
+                        <span className="text-sm font-bold text-slate-400">{libro.ejemplares?.length ?? 0} ejemplar{(libro.ejemplares?.length ?? 0) !== 1 ? 'es' : ''}</span>
+                        <button
+                          onClick={() => setShowAddEjemplar(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
+                        >
+                          <Plus size={14} />
+                          Agregar
+                        </button>
+                      </div>
                   </>
                 )}
               </div>
@@ -235,8 +263,118 @@ export default function LibroDetail() {
                 )}
               </div>
             </div>
+
+            {/* Ejemplares */}
+            {!isEditing && libro.ejemplares && libro.ejemplares.length > 0 && (
+              <div className="px-10 pb-10">
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
+                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Library size={14} /> Ejemplares ({libro.ejemplares.length})
+                  </h3>
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-slate-800/50">
+                          <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Código</th>
+                          <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Tipo</th>
+                          <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Ubicación</th>
+                          <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                        {libro.ejemplares.map(ej => (
+                          <tr key={ej.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                            <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
+                            <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
+                            <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                            <td className="px-4 py-2.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                ej.estado === 'DISPONIBLE'
+                                  ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600'
+                                  : ej.estado === 'PRESTADO'
+                                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600'
+                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+                              }`}>{ej.estado}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Modal agregar ejemplar */}
+        {showAddEjemplar && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddEjemplar(false)}>
+            <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-md border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+                <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Agregar Ejemplar</h3>
+                <button onClick={() => setShowAddEjemplar(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Código Interno</p>
+                  <input
+                    value={nuevoEj.codigoInterno}
+                    onChange={e => setNuevoEj(prev => ({ ...prev, codigoInterno: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-confirmar-ej')?.click(); } }}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Ej: LIB-002"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Tipo de Material</p>
+                  <select
+                    value={nuevoEj.tipoMaterial}
+                    onChange={e => setNuevoEj(prev => ({ ...prev, tipoMaterial: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="Libro">Libro</option>
+                    <option value="Folleto">Folleto</option>
+                    <option value="Fotocopia">Fotocopia</option>
+                    <option value="Revista">Revista</option>
+                    <option value="CD/DVD">CD/DVD</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Ubicación</p>
+                  <select
+                    value={nuevoEj.ubicacion}
+                    onChange={e => setNuevoEj(prev => ({ ...prev, ubicacion: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="En estante">En estante</option>
+                    <option value="Depósito">Depósito</option>
+                    <option value="En reparación">En reparación</option>
+                    <option value="En préstamo">En préstamo</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+                <button onClick={() => setShowAddEjemplar(false)} className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
+                  Cancelar
+                </button>
+                <button
+                  id="btn-confirmar-ej"
+                  disabled={!nuevoEj.codigoInterno || addEjemplar.isPending}
+                  onClick={() => addEjemplar.mutate({ libroId: id, ejemplares: [nuevoEj] })}
+                  className="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {addEjemplar.isPending ? 'Agregando...' : 'Agregar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

@@ -287,6 +287,34 @@ export const librosRouter = router({
       });
     }),
 
+  addEjemplares: publicProcedure
+    .input(z.object({
+      libroId: z.string(),
+      ejemplares: z.array(z.object({
+        codigoInterno: z.string().min(1),
+        tipoMaterial: z.string().optional(),
+        ubicacion: z.string().optional(),
+      })),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const libro = await ctx.prisma.libro.findUnique({ where: { id: input.libroId }, select: { id: true } });
+      if (!libro) throw new Error('Libro no encontrado');
+      await ctx.prisma.ejemplar.createMany({
+        data: input.ejemplares.map(e => ({
+          libroId: input.libroId,
+          codigoInterno: e.codigoInterno,
+          tipoMaterial: e.tipoMaterial || null,
+          ubicacion: e.ubicacion || null,
+        })),
+      });
+      const count = await ctx.prisma.ejemplar.count({ where: { libroId: input.libroId } });
+      await ctx.prisma.libro.update({
+        where: { id: input.libroId },
+        data: { cantidadEjemplares: count },
+      });
+      return true;
+    }),
+
   buscar: publicProcedure
     .input(z.object({ q: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
