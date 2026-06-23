@@ -40,7 +40,7 @@ export default function CatalogoList() {
   const [hoverCover, setHoverCover] = useState(false);
   const [coverRect, setCoverRect] = useState({ left: 0, top: 0, right: 0 });
   const coverRef = useRef<HTMLDivElement>(null);
-  const pageSize = 10;
+  const pageSize = 5;
   const { data, isLoading } = trpc.libros.getAll.useQuery({ search: searchDebounced, page, pageSize });
   const libros = data?.libros;
   const total = data?.total ?? 0;
