@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   BookOpen, 
@@ -36,6 +37,9 @@ export default function CatalogoList() {
   const [searchDebounced, setSearchDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [detalleLibro, setDetalleLibro] = useState<any>(null);
+  const [hoverCover, setHoverCover] = useState(false);
+  const [coverRect, setCoverRect] = useState({ left: 0, top: 0, right: 0 });
+  const coverRef = useRef<HTMLDivElement>(null);
   const pageSize = 10;
   const { data, isLoading } = trpc.libros.getAll.useQuery({ search: searchDebounced, page, pageSize });
   const libros = data?.libros;
@@ -284,7 +288,7 @@ export default function CatalogoList() {
       {/* Modal Detalle */}
       {detalleLibro && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setDetalleLibro(null)}>
-          <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-700">
               <div className="flex items-center gap-3">
@@ -301,13 +305,33 @@ export default function CatalogoList() {
               <div className="flex flex-col md:flex-row gap-8">
                 {/* Cover */}
                 <div className="flex-shrink-0">
-                  <div className="w-44 h-64 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg flex items-center justify-center">
+                  <div
+                    ref={coverRef}
+                    className="w-44 h-64 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg flex items-center justify-center cursor-pointer"
+                    onMouseEnter={() => {
+                      if (coverRef.current) {
+                        const r = coverRef.current.getBoundingClientRect();
+                        setCoverRect({ left: r.left, top: r.top, right: r.right });
+                      }
+                      setHoverCover(true);
+                    }}
+                    onMouseLeave={() => setHoverCover(false)}
+                  >
                     {detalleLibro.portadaUrl ? (
-                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || 'Portada'} className="w-full h-full object-cover" />
+                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || 'Portada'} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
                     ) : (
                       <Book size={48} className="text-slate-300 dark:text-slate-500" />
                     )}
                   </div>
+                  {typeof document !== 'undefined' && hoverCover && detalleLibro.portadaUrl && createPortal(
+                    <div
+                      className="fixed z-[9999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200"
+                      style={{ left: coverRect.right + 24, top: coverRect.top }}
+                    >
+                      <img src={detalleLibro.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-cover block" />
+                    </div>,
+                    document.body
+                  )}
                 </div>
 
                 {/* Details */}
