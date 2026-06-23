@@ -37,7 +37,7 @@ export default function LibroDetail() {
   const utils = trpc.useUtils();
   const [isEditing, setIsEditing] = useState(false);
   const [showAddEjemplar, setShowAddEjemplar] = useState(false);
-  const [nuevoEj, setNuevoEj] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
+  const [nuevoEj, setNuevoEj] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
   const { data: libro, isLoading } = trpc.libros.getById.useQuery({ id });
 
   const [form, setForm] = useState({
@@ -77,7 +77,7 @@ export default function LibroDetail() {
       utils.libros.getById.invalidate({ id });
       utils.libros.getAll.invalidate();
       setShowAddEjemplar(false);
-      setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
+      setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
     },
     onError: (error) => {
       toast.error(error.message, { duration: 4000 });
@@ -223,7 +223,10 @@ export default function LibroDetail() {
                       <div className="flex items-center gap-3 pt-2">
                         <span className="text-sm font-bold text-slate-400">{libro.ejemplares?.length ?? 0} ejemplar{(libro.ejemplares?.length ?? 0) !== 1 ? 'es' : ''}</span>
                         <button
-                          onClick={() => setShowAddEjemplar(true)}
+                          onClick={() => {
+                            setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: libro.codigoEstante || '' });
+                            setShowAddEjemplar(true);
+                          }}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
                         >
                           <Plus size={14} />
@@ -300,8 +303,17 @@ export default function LibroDetail() {
                         ))}
                       </tbody>
                     </table>
-                  </div>
                 </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Detalles (estante)</p>
+                  <input
+                    value={nuevoEj.codigoEstante}
+                    onChange={e => setNuevoEj(prev => ({ ...prev, codigoEstante: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Ej: Literatura Infantil 1"
+                  />
+                </div>
+              </div>
               </div>
             )}
           </div>
@@ -366,7 +378,7 @@ export default function LibroDetail() {
                 <button
                   id="btn-confirmar-ej"
                   disabled={!nuevoEj.codigoInterno || addEjemplar.isPending}
-                  onClick={() => addEjemplar.mutate({ libroId: id, ejemplares: [nuevoEj] })}
+                  onClick={() => addEjemplar.mutate({ libroId: id, codigoEstante: nuevoEj.codigoEstante, ejemplares: [{ codigoInterno: nuevoEj.codigoInterno, tipoMaterial: nuevoEj.tipoMaterial, ubicacion: nuevoEj.ubicacion }] })}
                   className="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {addEjemplar.isPending ? 'Agregando...' : 'Agregar'}

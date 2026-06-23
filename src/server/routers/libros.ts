@@ -290,6 +290,7 @@ export const librosRouter = router({
   addEjemplares: publicProcedure
     .input(z.object({
       libroId: z.string(),
+      codigoEstante: z.string().optional(),
       ejemplares: z.array(z.object({
         codigoInterno: z.string().min(1),
         tipoMaterial: z.string().optional(),
@@ -310,7 +311,10 @@ export const librosRouter = router({
       const count = await ctx.prisma.ejemplar.count({ where: { libroId: input.libroId } });
       await ctx.prisma.libro.update({
         where: { id: input.libroId },
-        data: { cantidadEjemplares: count },
+        data: {
+          cantidadEjemplares: count,
+          ...(input.codigoEstante !== undefined ? { codigoEstante: input.codigoEstante || null } : {}),
+        },
       });
       return true;
     }),
