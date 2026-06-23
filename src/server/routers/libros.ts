@@ -56,7 +56,7 @@ const subjectTranslations: Record<string, string> = {
   'juvenile fiction': 'Ficción juvenil',
   'young adult': 'Juvenil',
   'children': 'Infantil',
-  'children\'s literature': 'Literatura infantil',
+  "children's literature": 'Literatura infantil',
   'comics & graphic novels': 'Cómics y novelas gráficas',
   'graphic novels': 'Novelas gráficas',
   'mathematics': 'Matemáticas',
@@ -75,16 +75,64 @@ const subjectTranslations: Record<string, string> = {
   'house & home': 'Hogar',
   'family': 'Familia',
   'parenting': 'Crianza',
+  'spanish language books': 'Libros en español',
+  'spanish language materials': 'Materiales en español',
+  'spanish fiction': 'Ficción española',
+  'latin american fiction': 'Ficción latinoamericana',
+  'latinamerican literature': 'Literatura latinoamericana',
+  'colombian fiction': 'Ficción colombiana',
+  'magic realism': 'Realismo mágico',
+  'magic realism (literature)': 'Realismo mágico (literatura)',
+  'social conditions': 'Condiciones sociales',
+  'epic literature': 'Literatura épica',
+  'epic poems': 'Poemas épicos',
+  'large type books': 'Libros de letra grande',
+  'cliffs notes': 'Guías de estudio',
+  'novel': 'Novela',
+  'novels': 'Novelas',
+  'fiction (fictional works by one author)': 'Ficción (obras de un autor)',
+  'fiction, general': 'Ficción, general',
+  'spanish american fiction': 'Ficción hispanoamericana',
+  'spanish language': 'Lengua española',
+  'criticism and interpretation': 'Crítica e interpretación',
+  'translations into arabic': 'Traducciones al árabe',
+  'translations into french': 'Traducciones al francés',
+  'translations into russian': 'Traducciones al ruso',
+  'translations into gujarati': 'Traducciones al guyaratí',
+  'in english': 'En inglés',
+  'language study': 'Estudio de idiomas',
+  'long now manual for civilization': 'Long Now Manual for Civilization',
+  'romance literature': 'Literatura romántica',
+  'condiciones sociales': 'Condiciones sociales',
+  'novela': 'Novela',
+  'ficción': 'Ficción',
+  'literatura épica': 'Literatura épica',
+  'realismo mágico': 'Realismo mágico',
+  'literatura latinoamericana': 'Literatura latinoamericana',
+  'ficción latinoamericana': 'Ficción latinoamericana',
+  'ficción hispanoamericana': 'Ficción hispanoamericana',
+  'historias cortas': 'Cuentos',
+  'aventura': 'Aventura',
+  'literatura infantil': 'Literatura infantil',
+  'literatura juvenil': 'Literatura juvenil',
+  'materiales en español': 'Materiales en español',
+  'libros en español': 'Libros en español',
 };
 
 function translateSubjects(subjects: string): string {
   if (!subjects) return subjects;
-  return subjects.split(',').map(s => {
-    const trimmed = s.trim().toLowerCase();
-    const translated = subjectTranslations[trimmed];
-    if (translated) return translated;
-    // intentar con mayúscula inicial
-    return s.trim();
+  const items = subjects.split(',').map(s => s.trim());
+  const translated = items.map(s => {
+    const lower = s.toLowerCase();
+    return subjectTranslations[lower] || s;
+  });
+  // Eliminar duplicados (caso insensitivo)
+  const seen = new Set<string>();
+  return translated.filter(s => {
+    const key = s.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   }).join(', ');
 }
 
