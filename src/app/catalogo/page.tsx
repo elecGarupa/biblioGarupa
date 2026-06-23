@@ -237,19 +237,8 @@ export default function CatalogoList() {
                           </Link>
                           <button
                             onClick={() => {
-                              if (libro.cantidadEjemplares > 0) {
-                                setDeleteTarget(libro);
-                                setSelectedEjemplares(new Set());
-                              } else {
-                                toast(`¿Eliminar "${libro.titulo}"?`, {
-                                  description: 'Esta acción no se puede deshacer.',
-                                  action: {
-                                    label: 'Eliminar',
-                                    onClick: () => eliminarLibro.mutate({ id: libro.id }),
-                                  },
-                                  duration: 6000,
-                                });
-                              }
+                              setDeleteTarget(libro);
+                              setSelectedEjemplares(new Set());
                             }}
                             disabled={eliminarLibro.isPending}
                             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
