@@ -145,22 +145,27 @@ export default function NuevoLibro() {
   const searchExternal = trpc.libros.getByIsbnExternal.useMutation({
     onSuccess: (data) => {
       setIsSearching(false);
+      console.log('[Flujo A - onSuccess] datos recibidos:', data);
       if (data) {
         toast.success('Datos autocompletados desde ISBN', { duration: 3000 });
-        setFormData(prev => ({
-          ...prev,
-          titulo: data.titulo || prev.titulo,
-          autor: data.autor || prev.autor,
-          colaboradores: data.colaboradores || prev.colaboradores,
-          anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
-          editorial: data.editorial || prev.editorial,
-          lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
-          edicion: data.edicion || prev.edicion,
-          portadaUrl: data.portadaUrl || '',
-          descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
-          idioma: data.idioma || prev.idioma,
-          temas: data.temas || prev.temas,
-        }));
+        console.log('[Flujo A] seteando titulo a:', data.titulo);
+        setFormData(prev => {
+          console.log('[Flujo A] prev.titulo:', prev.titulo, 'data.titulo:', data.titulo);
+          return {
+            ...prev,
+            titulo: data.titulo || prev.titulo,
+            autor: data.autor || prev.autor,
+            colaboradores: data.colaboradores || prev.colaboradores,
+            anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
+            editorial: data.editorial || prev.editorial,
+            lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
+            edicion: data.edicion || prev.edicion,
+            portadaUrl: data.portadaUrl || '',
+            descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
+            idioma: data.idioma || prev.idioma,
+            temas: data.temas || prev.temas,
+          };
+        });
       } else {
         toast.error('No se encontraron datos para este ISBN.', { duration: 4000 });
       }
