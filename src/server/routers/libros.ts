@@ -442,7 +442,6 @@ export const librosRouter = router({
             temas = translateSubjects(info.categories?.join(', ') || '');
             portadaUrl = info.imageLinks?.thumbnail?.replace('http:', 'https:') || '';
             descripcionFisica = info.pageCount ? `${info.pageCount} p.` : '';
-            console.log('[getByIsbnExternal] Campos extraídos de Google Books:', { titulo, autor, editorial, anioPublicacion, idioma, temas });
             found = true;
           }
         } else {
@@ -526,7 +525,6 @@ export const librosRouter = router({
       }
 
       if (found) {
-        console.log('[getByIsbnExternal] Retornando datos:', { titulo, autor, editorial, anioPublicacion, idioma, temas });
         return {
           titulo,
           autor,
@@ -542,7 +540,6 @@ export const librosRouter = router({
         };
       }
 
-      console.log('[getByIsbnExternal] No se encontraron datos');
       return null;
     }),
 });
