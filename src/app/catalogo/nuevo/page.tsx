@@ -115,8 +115,10 @@ export default function NuevoLibro() {
     tipoMaterial: '',
     ubicacion: '',
     portadaUrl: '',
-    cantidadEjemplares: 1
+    codigoEstante: '',
   });
+  const [ejemplares, setEjemplares] = useState<{ codigoInterno: string; tipoMaterial: string; ubicacion: string }[]>([]);
+  const [nuevoEjemplar, setNuevoEjemplar] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
   const [searchQuery, setSearchQuery] = useState({ titulo: '', autor: '' });
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -249,13 +251,13 @@ export default function NuevoLibro() {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
-      [name]: name === 'cantidadEjemplares' ? parseInt(value) || 0 : value 
+      [name]: value
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createLibro.mutate(formData);
+    createLibro.mutate({ ...formData, ejemplares });
   };
 
   return (
@@ -585,25 +587,34 @@ export default function NuevoLibro() {
                     </FormField>
                   </FormSection>
 
-                  {/* ===== SECCIÓN: DATOS EXTRA (FUERA DE MARC) ===== */}
-                  <FormSection title="📦 Datos de la Biblioteca (Fuera de MARC)">
+                  {/* ===== SECCIÓN: EJEMPLARES ===== */}
+                  <FormSection title="📦 Ejemplares">
+                    <FormField label="Estante / Categoría" icon={LocateFixed}>
+                      <input 
+                        name="codigoEstante"
+                        value={formData.codigoEstante}
+                        onChange={handleChange}
+                        className={inputClasses}
+                        placeholder="Ej: Literatura Infantil 1" 
+                        type="text"
+                      />
+                    </FormField>
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <FormField label="Nº de Inventario" icon={Package}>
+                      <FormField label="Código Interno" icon={Hash}>
                         <input 
-                          name="inventario"
-                          value={formData.inventario}
-                          onChange={handleChange}
+                          value={nuevoEjemplar.codigoInterno}
+                          onChange={e => setNuevoEjemplar(prev => ({ ...prev, codigoInterno: e.target.value }))}
                           className={inputClasses}
-                          placeholder="Nº interno" 
+                          placeholder="Ej: LIB-001" 
                           type="text"
                         />
                       </FormField>
 
                       <FormField label="Tipo de Material" icon={Layers}>
                         <select
-                          name="tipoMaterial"
-                          value={formData.tipoMaterial}
-                          onChange={handleChange}
+                          value={nuevoEjemplar.tipoMaterial}
+                          onChange={e => setNuevoEjemplar(prev => ({ ...prev, tipoMaterial: e.target.value }))}
                           className={inputClasses + " appearance-none cursor-pointer"}
                         >
                           <option value="">Seleccionar...</option>
@@ -616,32 +627,76 @@ export default function NuevoLibro() {
                         </select>
                       </FormField>
 
-                      <FormField label="Ubicación Actual" icon={LocateFixed}>
+                      <FormField label="Ubicación" icon={LocateFixed}>
                         <select
-                          name="ubicacion"
-                          value={formData.ubicacion}
-                          onChange={handleChange}
+                          value={nuevoEjemplar.ubicacion}
+                          onChange={e => setNuevoEjemplar(prev => ({ ...prev, ubicacion: e.target.value }))}
                           className={inputClasses + " appearance-none cursor-pointer"}
                         >
                           <option value="">Seleccionar...</option>
                           <option value="En estante">En estante</option>
+                          <option value="Depósito">Depósito</option>
                           <option value="En reparación">En reparación</option>
                           <option value="En préstamo">En préstamo</option>
-                          <option value="Depósito">Depósito</option>
                         </select>
                       </FormField>
                     </div>
 
-                    <FormField label="Cantidad de Ejemplares" icon={Library}>
-                      <input 
-                        name="cantidadEjemplares"
-                        value={formData.cantidadEjemplares}
-                        onChange={handleChange}
-                        min={1}
-                        className={inputClasses}
-                        type="number"
-                      />
-                    </FormField>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!nuevoEjemplar.codigoInterno) {
+                          toast.error('Ingrese un código interno');
+                          return;
+                        }
+                        if (ejemplares.some(e => e.codigoInterno === nuevoEjemplar.codigoInterno)) {
+                          toast.error('Ya existe un ejemplar con ese código');
+                          return;
+                        }
+                        setEjemplares(prev => [...prev, { ...nuevoEjemplar }]);
+                        setNuevoEjemplar({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
+                      }}
+                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95"
+                    >
+                      + Agregar Ejemplar
+                    </button>
+
+                    {ejemplares.length > 0 && (
+                      <div className="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 dark:bg-slate-800/50">
+                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Código Interno</th>
+                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Tipo de Material</th>
+                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Ubicación</th>
+                              <th className="w-16"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                            {ejemplares.map((ej, i) => (
+                              <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
+                                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
+                                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                                <td className="px-4 py-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => setEjemplares(prev => prev.filter((_, j) => j !== i))}
+                                    className="p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                  >
+                                    <X size={16} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                      Total: <span className="text-indigo-600 dark:text-indigo-400">{ejemplares.length}</span> ejemplar{ejemplares.length !== 1 && 'es'}
+                    </p>
                   </FormSection>
 
                   {/* Form Actions */}

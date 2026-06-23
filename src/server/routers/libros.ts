@@ -137,6 +137,12 @@ function translateSubjects(subjects: string): string {
 }
 
 // Schema Zod compartido para los campos MARC 21 + campos extra
+const ejemplarSchema = z.object({
+  codigoInterno: z.string().min(1),
+  tipoMaterial: z.string().optional(),
+  ubicacion: z.string().optional(),
+});
+
 const libroFieldsSchema = z.object({
   isbn: z.string().optional(),                  // MARC 020
   idioma: z.string().optional(),                // MARC 041
@@ -154,12 +160,14 @@ const libroFieldsSchema = z.object({
   descriptores: z.string().optional(),          // MARC 653
   colaboradores: z.string().optional(),         // MARC 700
   bibliotecario: z.string().optional(),         // MARC 900
-  inventario: z.string().optional(),            // Extra - Nº inventario
-  tipoMaterial: z.string().optional(),          // Extra - Tipo de material
-  ubicacion: z.string().optional(),             // Extra - Ubicación actual
+  inventario: z.string().optional(),            // Extra - Nº inventario (deprecado)
+  tipoMaterial: z.string().optional(),          // Extra (deprecado, usar ejemplares)
+  ubicacion: z.string().optional(),             // Extra (deprecado, usar ejemplares)
   portadaUrl: z.string().optional(),            // Portada
+  codigoEstante: z.string().optional(),          // Ej: "Literatura Infantil 1"
   cantidadEjemplares: z.number().default(1),
   datosMarc: z.any().optional(),
+  ejemplares: z.array(ejemplarSchema).optional(),
 });
 
 export const librosRouter = router({
@@ -202,7 +210,10 @@ export const librosRouter = router({
           where,
           include: {
             _count: {
-              select: { prestamos: { where: { estado: 'PRESTADO' } } },
+              select: {
+                ejemplares: true,
+                prestamos: { where: { estado: 'PRESTADO' } },
+              },
             },
           },
           skip,
@@ -215,7 +226,8 @@ export const librosRouter = router({
       return {
         libros: libros.map(l => ({
           ...l,
-          ejemplaresDisponibles: l.cantidadEjemplares - l._count.prestamos,
+          cantidadEjemplares: l._count.ejemplares || l.cantidadEjemplares,
+          ejemplaresDisponibles: (l._count.ejemplares || l.cantidadEjemplares) - l._count.prestamos,
         })),
         total,
       };
@@ -226,28 +238,33 @@ export const librosRouter = router({
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.libro.findUnique({
         where: { id: input.id },
+        include: { ejemplares: true },
       });
     }),
 
   create: publicProcedure
     .input(libroFieldsSchema)
     .mutation(async ({ ctx, input }) => {
-      // Filtrar campos vacíos para no guardar strings vacíos como datos
+      const { ejemplares, ...libroData } = input;
       const data: any = {};
-      for (const [key, value] of Object.entries(input)) {
+      for (const [key, value] of Object.entries(libroData)) {
         if (value !== undefined && value !== null && value !== '') {
           data[key] = value;
         }
       }
-      return await ctx.prisma.libro.create({
-        data,
-      });
+      data.cantidadEjemplares = ejemplares?.length || 1;
+      if (ejemplares && ejemplares.length > 0) {
+        data.ejemplares = {
+          createMany: { data: ejemplares.map(e => ({ codigoInterno: e.codigoInterno, tipoMaterial: e.tipoMaterial || null, ubicacion: e.ubicacion || null })) },
+        };
+      }
+      return await ctx.prisma.libro.create({ data });
     }),
 
   update: publicProcedure
     .input(libroFieldsSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, ejemplares, ...data } = input;
       return await ctx.prisma.libro.update({
         where: { id },
         data,

@@ -65,16 +65,32 @@ model Libro {
   bibliotecario      String?    // MARC 900 - Bibliotecario responsable del registro
 
   // --- Campos extra (fuera de MARC) ---
-  inventario         String?    // Nº de inventario interno de la biblioteca
-  tipoMaterial       String?    // Tipo: libro, folleto, fotocopia, etc.
-  ubicacion          String?    // Ubicación actual: en estante, reparación, préstamo, etc.
+  inventario         String?    // [Deprecado] Usar ejemplares
+  tipoMaterial       String?    // [Deprecado] Usar ejemplares
+  ubicacion          String?    // [Deprecado] Usar ejemplares
   portadaUrl         String?    // URL de la imagen de portada
-  cantidadEjemplares Int        @default(1)
+  codigoEstante      String?    // Ej: "Literatura Infantil 1"
+  cantidadEjemplares Int        @default(1) // [Deprecado] Calcular desde ejemplares
   datosMarc          Json?      // Flexibilidad para otras etiquetas MARC futuras
 
+  ejemplares         Ejemplar[]
   prestamos          Prestamo[]
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
+}
+
+model Ejemplar {
+  id             String   @id @default(cuid())
+  codigoInterno  String
+  tipoMaterial   String?
+  ubicacion      String?
+  estado         String   @default("DISPONIBLE") // DISPONIBLE, PRESTADO, MANTENIMIENTO
+  libroId        String
+  libro          Libro    @relation(fields: [libroId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([libroId, codigoInterno])
 }
 
 model Prestamo {

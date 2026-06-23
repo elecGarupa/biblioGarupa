@@ -45,6 +45,10 @@ export default function CatalogoList() {
   const libros = data?.libros;
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const { data: detalleCompleto } = trpc.libros.getById.useQuery(
+    { id: detalleLibro?.id ?? '' },
+    { enabled: !!detalleLibro?.id },
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -364,14 +368,8 @@ export default function CatalogoList() {
                     {detalleLibro.clasificacion && (
                       <DetailField icon={<Book size={14} />} label="Clasificación" value={detalleLibro.clasificacion} />
                     )}
-                    {detalleLibro.tipoMaterial && (
-                      <DetailField icon={<FileText size={14} />} label="Tipo" value={detalleLibro.tipoMaterial} />
-                    )}
-                    {detalleLibro.ubicacion && (
-                      <DetailField icon={<MapPin size={14} />} label="Ubicación" value={detalleLibro.ubicacion} />
-                    )}
-                    {detalleLibro.inventario && (
-                      <DetailField icon={<Hash size={14} />} label="Inventario" value={detalleLibro.inventario} />
+                    {detalleLibro.codigoEstante && (
+                      <DetailField icon={<MapPin size={14} />} label="Estante" value={detalleLibro.codigoEstante} />
                     )}
                     {detalleLibro.lugarPublicacion && (
                       <DetailField icon={<MapPin size={14} />} label="Lugar" value={detalleLibro.lugarPublicacion} />
@@ -405,6 +403,45 @@ export default function CatalogoList() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Ejemplares */}
+                  {detalleCompleto?.ejemplares && detalleCompleto.ejemplares.length > 0 && (
+                    <div className="pt-2">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Library size={12} /> Ejemplares</p>
+                      <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 dark:bg-slate-800/50">
+                              <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Código</th>
+                              <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Tipo</th>
+                              <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Ubicación</th>
+                              <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                            {detalleCompleto.ejemplares.map((ej) => (
+                              <tr key={ej.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
+                                <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
+                                <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                                <td className="px-4 py-2.5">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    ej.estado === 'DISPONIBLE'
+                                      ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600'
+                                      : ej.estado === 'PRESTADO'
+                                      ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600'
+                                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
+                                  }`}>
+                                    {ej.estado}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Additional fields */}
                   {detalleLibro.descripcionFisica && (
