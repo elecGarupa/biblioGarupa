@@ -132,6 +132,10 @@ export default function NuevoLibro() {
     }
   }, [(session?.user as any)?.nombreCompleto]);
 
+  useEffect(() => {
+    console.log('[RENDER] formData.titulo:', formData.titulo);
+  }, [formData.titulo]);
+
   const createLibro = trpc.libros.create.useMutation({
     onSuccess: () => {
       toast.success('Libro registrado exitosamente', { duration: 3000 });
@@ -194,22 +198,28 @@ export default function NuevoLibro() {
 
   const fetchExternalDetails = trpc.libros.getByExternalId.useMutation({
     onSuccess: (data) => {
+      console.log('[Flujo B - getByExternalId onSuccess] data:', data);
       if (data) {
-        setFormData(prev => ({
-          ...prev,
-          titulo: data.titulo || prev.titulo,
-          autor: data.autor || prev.autor,
-          colaboradores: data.colaboradores || prev.colaboradores,
-          anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
-          editorial: data.editorial || prev.editorial,
-          lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
-          edicion: data.edicion || prev.edicion,
-          portadaUrl: data.portadaUrl || prev.portadaUrl,
-          descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
-          idioma: data.idioma || prev.idioma,
-          temas: data.temas || prev.temas,
-          isbn: data.isbn || prev.isbn,
-        }));
+        console.log('[Flujo B] seteando titulo a:', data.titulo, 'isbn a:', data.isbn);
+        setFormData(prev => {
+          console.log('[Flujo B] prev.titulo:', prev.titulo, 'prev.isbn:', prev.isbn);
+          console.log('[Flujo B] data.titulo:', data.titulo, 'data.isbn:', data.isbn);
+          return {
+            ...prev,
+            titulo: data.titulo || prev.titulo,
+            autor: data.autor || prev.autor,
+            colaboradores: data.colaboradores || prev.colaboradores,
+            anioPublicacion: data.anioPublicacion || prev.anioPublicacion,
+            editorial: data.editorial || prev.editorial,
+            lugarPublicacion: data.lugarPublicacion || prev.lugarPublicacion,
+            edicion: data.edicion || prev.edicion,
+            portadaUrl: data.portadaUrl || prev.portadaUrl,
+            descripcionFisica: data.descripcionFisica || prev.descripcionFisica,
+            idioma: data.idioma || prev.idioma,
+            temas: data.temas || prev.temas,
+            isbn: data.isbn || prev.isbn,
+          };
+        });
       }
     },
     onError: () => {},
