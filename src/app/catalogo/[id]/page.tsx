@@ -56,7 +56,6 @@ export default function LibroDetail() {
     temas: '',
     descriptores: '',
     colaboradores: '',
-    codigoEstante: '',
   });
 
   const updateLibro = trpc.libros.update.useMutation({
@@ -102,7 +101,6 @@ export default function LibroDetail() {
       temas: libro.temas || '',
       descriptores: libro.descriptores || '',
       colaboradores: libro.colaboradores || '',
-      codigoEstante: libro.codigoEstante || '',
     });
     setIsEditing(true);
   };
@@ -207,7 +205,6 @@ export default function LibroDetail() {
                     <EditField icon={<User size={18} />} label="Autor" value={form.autor} onChange={(v) => setForm(f => ({ ...f, autor: v }))} />
                     <EditField icon={<Building2 size={18} />} label="Autor Institucional" value={form.autorInstitucional} onChange={(v) => setForm(f => ({ ...f, autorInstitucional: v }))} />
                     <EditField icon={<BookCopy size={18} />} label="Edición" value={form.edicion} onChange={(v) => setForm(f => ({ ...f, edicion: v }))} />
-                    <EditField icon={<MapPin size={18} />} label="Estante / Detalles" value={form.codigoEstante} onChange={(v) => setForm(f => ({ ...f, codigoEstante: v }))} />
                   </>
                 ) : (
                   <>
@@ -218,13 +215,12 @@ export default function LibroDetail() {
                     <InfoRow icon={<User size={18} />} label="Autor" value={libro.autor || '—'} />
                     <InfoRow icon={<Building2 size={18} />} label="Autor Institucional" value={libro.autorInstitucional || '—'} />
                     <InfoRow icon={<BookCopy size={18} />} label="Edición" value={libro.edicion || '—'} />
-                    {libro.codigoEstante && <InfoRow icon={<MapPin size={18} />} label="Estante" value={libro.codigoEstante} />}
                       <InfoRow icon={<Layers size={18} />} label="Ejemplares" value={String(libro.cantidadEjemplares)} />
                       <div className="flex items-center gap-3 pt-2">
                         <span className="text-sm font-bold text-slate-400">{libro.ejemplares?.length ?? 0} ejemplar{(libro.ejemplares?.length ?? 0) !== 1 ? 'es' : ''}</span>
                         <button
                           onClick={() => {
-                            setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: libro.codigoEstante || '' });
+                            setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
                             setShowAddEjemplar(true);
                           }}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
@@ -281,6 +277,7 @@ export default function LibroDetail() {
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Código</th>
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Tipo</th>
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Ubicación</th>
+                          <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Detalles</th>
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Estado</th>
                         </tr>
                       </thead>
@@ -290,6 +287,7 @@ export default function LibroDetail() {
                             <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
                             <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
                             <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                            <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.codigoEstante || '—'}</td>
                             <td className="px-4 py-2.5">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 ej.estado === 'DISPONIBLE'
@@ -378,7 +376,7 @@ export default function LibroDetail() {
                 <button
                   id="btn-confirmar-ej"
                   disabled={!nuevoEj.codigoInterno || addEjemplar.isPending}
-                  onClick={() => addEjemplar.mutate({ libroId: id, codigoEstante: nuevoEj.codigoEstante, ejemplares: [{ codigoInterno: nuevoEj.codigoInterno, tipoMaterial: nuevoEj.tipoMaterial, ubicacion: nuevoEj.ubicacion }] })}
+                  onClick={() => addEjemplar.mutate({ libroId: id, ejemplares: [{ codigoInterno: nuevoEj.codigoInterno, tipoMaterial: nuevoEj.tipoMaterial, ubicacion: nuevoEj.ubicacion, codigoEstante: nuevoEj.codigoEstante }] })}
                   className="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {addEjemplar.isPending ? 'Agregando...' : 'Agregar'}

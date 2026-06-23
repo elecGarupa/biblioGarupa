@@ -115,10 +115,9 @@ export default function NuevoLibro() {
     tipoMaterial: '',
     ubicacion: '',
     portadaUrl: '',
-    codigoEstante: '',
   });
-  const [ejemplares, setEjemplares] = useState<{ codigoInterno: string; tipoMaterial: string; ubicacion: string }[]>([]);
-  const [nuevoEjemplar, setNuevoEjemplar] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
+  const [ejemplares, setEjemplares] = useState<{ codigoInterno: string; tipoMaterial: string; ubicacion: string; codigoEstante: string }[]>([]);
+  const [nuevoEjemplar, setNuevoEjemplar] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
   const [searchQuery, setSearchQuery] = useState({ titulo: '', autor: '' });
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -620,11 +619,10 @@ export default function NuevoLibro() {
                         </select>
                       </FormField>
 
-                      <FormField label="Detalles" icon={LocateFixed}>
+                      <FormField label="Detalles (estante)" icon={LocateFixed}>
                         <input 
-                          name="codigoEstante"
-                          value={formData.codigoEstante}
-                          onChange={handleChange}
+                          value={nuevoEjemplar.codigoEstante}
+                          onChange={e => setNuevoEjemplar(prev => ({ ...prev, codigoEstante: e.target.value }))}
                           className={inputClasses}
                           placeholder="Ej: Literatura Infantil 1" 
                           type="text"
@@ -657,7 +655,7 @@ export default function NuevoLibro() {
                             toast.error('Ya existe un ejemplar con ese código');
                             return;
                           }
-                          setEjemplares(prev => [...prev, { codigoInterno: nuevoEjemplar.codigoInterno, tipoMaterial: nuevoEjemplar.tipoMaterial, ubicacion: nuevoEjemplar.ubicacion }]);
+                          setEjemplares(prev => [...prev, { codigoInterno: nuevoEjemplar.codigoInterno, tipoMaterial: nuevoEjemplar.tipoMaterial, ubicacion: nuevoEjemplar.ubicacion, codigoEstante: nuevoEjemplar.codigoEstante }]);
                           setNuevoEjemplar(prev => ({ ...prev, codigoInterno: '' }));
                         }}
                         className="px-6 py-3.5 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 mb-0.5"
@@ -672,8 +670,9 @@ export default function NuevoLibro() {
                           <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800/50">
                               <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Código Interno</th>
-                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Tipo de Material</th>
+                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Tipo</th>
                               <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Ubicación</th>
+                              <th className="text-left px-4 py-3 font-bold text-slate-500 dark:text-slate-400">Detalles</th>
                               <th className="w-16"></th>
                             </tr>
                           </thead>
@@ -683,6 +682,7 @@ export default function NuevoLibro() {
                                 <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
                                 <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
                                 <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{ej.codigoEstante || '—'}</td>
                                 <td className="px-4 py-3">
                                   <button
                                     type="button"

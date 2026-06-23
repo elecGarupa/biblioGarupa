@@ -141,6 +141,7 @@ const ejemplarSchema = z.object({
   codigoInterno: z.string().min(1),
   tipoMaterial: z.string().optional(),
   ubicacion: z.string().optional(),
+  codigoEstante: z.string().optional(),
 });
 
 const libroFieldsSchema = z.object({
@@ -164,7 +165,6 @@ const libroFieldsSchema = z.object({
   tipoMaterial: z.string().optional(),          // Extra (deprecado, usar ejemplares)
   ubicacion: z.string().optional(),             // Extra (deprecado, usar ejemplares)
   portadaUrl: z.string().optional(),            // Portada
-  codigoEstante: z.string().optional(),          // Ej: "Literatura Infantil 1"
   cantidadEjemplares: z.number().default(1),
   datosMarc: z.any().optional(),
   ejemplares: z.array(ejemplarSchema).optional(),
@@ -255,7 +255,7 @@ export const librosRouter = router({
       data.cantidadEjemplares = ejemplares?.length || 1;
       if (ejemplares && ejemplares.length > 0) {
         data.ejemplares = {
-          createMany: { data: ejemplares.map(e => ({ codigoInterno: e.codigoInterno, tipoMaterial: e.tipoMaterial || null, ubicacion: e.ubicacion || null })) },
+          createMany: { data: ejemplares.map(e => ({ codigoInterno: e.codigoInterno, tipoMaterial: e.tipoMaterial || null, ubicacion: e.ubicacion || null, codigoEstante: e.codigoEstante || null })) },
         };
       }
       return await ctx.prisma.libro.create({ data });
@@ -290,11 +290,11 @@ export const librosRouter = router({
   addEjemplares: publicProcedure
     .input(z.object({
       libroId: z.string(),
-      codigoEstante: z.string().optional(),
       ejemplares: z.array(z.object({
         codigoInterno: z.string().min(1),
         tipoMaterial: z.string().optional(),
         ubicacion: z.string().optional(),
+        codigoEstante: z.string().optional(),
       })),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -306,15 +306,13 @@ export const librosRouter = router({
           codigoInterno: e.codigoInterno,
           tipoMaterial: e.tipoMaterial || null,
           ubicacion: e.ubicacion || null,
+          codigoEstante: e.codigoEstante || null,
         })),
       });
       const count = await ctx.prisma.ejemplar.count({ where: { libroId: input.libroId } });
       await ctx.prisma.libro.update({
         where: { id: input.libroId },
-        data: {
-          cantidadEjemplares: count,
-          ...(input.codigoEstante !== undefined ? { codigoEstante: input.codigoEstante || null } : {}),
-        },
+        data: { cantidadEjemplares: count },
       });
       return true;
     }),

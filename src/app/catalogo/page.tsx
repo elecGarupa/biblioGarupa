@@ -380,9 +380,6 @@ export default function CatalogoList() {
                     {detalleLibro.clasificacion && (
                       <DetailField icon={<Book size={14} />} label="Clasificación" value={detalleLibro.clasificacion} />
                     )}
-                    {detalleLibro.codigoEstante && (
-                      <DetailField icon={<MapPin size={14} />} label="Estante" value={detalleLibro.codigoEstante} />
-                    )}
                     {detalleLibro.lugarPublicacion && (
                       <DetailField icon={<MapPin size={14} />} label="Lugar" value={detalleLibro.lugarPublicacion} />
                     )}
@@ -427,6 +424,7 @@ export default function CatalogoList() {
                               <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Código</th>
                               <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Tipo</th>
                               <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Ubicación</th>
+                              <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Detalles</th>
                               <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Estado</th>
                             </tr>
                           </thead>
@@ -436,6 +434,7 @@ export default function CatalogoList() {
                                 <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
                                 <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
                                 <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.ubicacion || '—'}</td>
+                                <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.codigoEstante || '—'}</td>
                                 <td className="px-4 py-2.5">
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                     ej.estado === 'DISPONIBLE'
