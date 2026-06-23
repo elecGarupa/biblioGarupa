@@ -589,28 +589,7 @@ export default function NuevoLibro() {
 
                   {/* ===== SECCIÓN: EJEMPLARES ===== */}
                   <FormSection title="📦 Ejemplares">
-                    <FormField label="Estante / Categoría" icon={LocateFixed}>
-                      <input 
-                        name="codigoEstante"
-                        value={formData.codigoEstante}
-                        onChange={handleChange}
-                        className={inputClasses}
-                        placeholder="Ej: Literatura Infantil 1" 
-                        type="text"
-                      />
-                    </FormField>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <FormField label="Código Interno" icon={Hash}>
-                        <input 
-                          value={nuevoEjemplar.codigoInterno}
-                          onChange={e => setNuevoEjemplar(prev => ({ ...prev, codigoInterno: e.target.value }))}
-                          className={inputClasses}
-                          placeholder="Ej: LIB-001" 
-                          type="text"
-                        />
-                      </FormField>
-
                       <FormField label="Tipo de Material" icon={Layers}>
                         <select
                           value={nuevoEjemplar.tipoMaterial}
@@ -640,26 +619,52 @@ export default function NuevoLibro() {
                           <option value="En préstamo">En préstamo</option>
                         </select>
                       </FormField>
+
+                      <FormField label="Detalles" icon={LocateFixed}>
+                        <input 
+                          name="codigoEstante"
+                          value={formData.codigoEstante}
+                          onChange={handleChange}
+                          className={inputClasses}
+                          placeholder="Ej: Literatura Infantil 1" 
+                          type="text"
+                        />
+                      </FormField>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!nuevoEjemplar.codigoInterno) {
-                          toast.error('Ingrese un código interno');
-                          return;
-                        }
-                        if (ejemplares.some(e => e.codigoInterno === nuevoEjemplar.codigoInterno)) {
-                          toast.error('Ya existe un ejemplar con ese código');
-                          return;
-                        }
-                        setEjemplares(prev => [...prev, { ...nuevoEjemplar }]);
-                        setNuevoEjemplar({ codigoInterno: '', tipoMaterial: '', ubicacion: '' });
-                      }}
-                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95"
-                    >
-                      + Agregar Ejemplar
-                    </button>
+                    <div className="flex items-end gap-4">
+                      <div className="flex-grow">
+                        <FormField label="Código Interno" icon={Hash}>
+                          <input 
+                            value={nuevoEjemplar.codigoInterno}
+                            onChange={e => setNuevoEjemplar(prev => ({ ...prev, codigoInterno: e.target.value }))}
+                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-agregar-ej')?.click(); } }}
+                            className={inputClasses}
+                            placeholder="Ej: LIB-001" 
+                            type="text"
+                          />
+                        </FormField>
+                      </div>
+                      <button
+                        id="btn-agregar-ej"
+                        type="button"
+                        onClick={() => {
+                          if (!nuevoEjemplar.codigoInterno) {
+                            toast.error('Ingrese un código interno');
+                            return;
+                          }
+                          if (ejemplares.some(e => e.codigoInterno === nuevoEjemplar.codigoInterno)) {
+                            toast.error('Ya existe un ejemplar con ese código');
+                            return;
+                          }
+                          setEjemplares(prev => [...prev, { codigoInterno: nuevoEjemplar.codigoInterno, tipoMaterial: nuevoEjemplar.tipoMaterial, ubicacion: nuevoEjemplar.ubicacion }]);
+                          setNuevoEjemplar(prev => ({ ...prev, codigoInterno: '' }));
+                        }}
+                        className="px-6 py-3.5 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 mb-0.5"
+                      >
+                        + Agregar
+                      </button>
+                    </div>
 
                     {ejemplares.length > 0 && (
                       <div className="mt-4 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
