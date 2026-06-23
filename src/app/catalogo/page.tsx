@@ -37,6 +37,8 @@ export default function CatalogoList() {
   const [searchDebounced, setSearchDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [detalleLibro, setDetalleLibro] = useState<any>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [selectedEjemplares, setSelectedEjemplares] = useState<Set<string>>(new Set());
   const [hoverCover, setHoverCover] = useState(false);
   const [coverRect, setCoverRect] = useState({ left: 0, top: 0, right: 0 });
   const coverRef = useRef<HTMLDivElement>(null);
@@ -48,6 +50,10 @@ export default function CatalogoList() {
   const { data: detalleCompleto } = trpc.libros.getById.useQuery(
     { id: detalleLibro?.id ?? '' },
     { enabled: !!detalleLibro?.id },
+  );
+  const { data: deleteEjemplaresData } = trpc.libros.getById.useQuery(
+    { id: deleteTarget?.id ?? '' },
+    { enabled: !!deleteTarget },
   );
 
   useEffect(() => {
@@ -64,6 +70,18 @@ export default function CatalogoList() {
       toast.success('Libro eliminado del inventario', { duration: 3000 });
       utils.libros.getAll.invalidate();
       utils.circulacion.getMetrics.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
+
+  const eliminarEjemplares = trpc.libros.deleteEjemplares.useMutation({
+    onSuccess: () => {
+      toast.success('Ejemplares eliminados', { duration: 3000 });
+      utils.libros.getAll.invalidate();
+      utils.circulacion.getMetrics.invalidate();
+      setDeleteTarget(null);
     },
     onError: (error) => {
       toast.error(error.message, { duration: 4000 });
@@ -219,14 +237,19 @@ export default function CatalogoList() {
                           </Link>
                           <button
                             onClick={() => {
-                              toast(`¿Eliminar "${libro.titulo}"?`, {
-                                description: 'Esta acción no se puede deshacer.',
-                                action: {
-                                  label: 'Eliminar',
-                                  onClick: () => eliminarLibro.mutate({ id: libro.id }),
-                                },
-                                duration: 6000,
-                              });
+                              if (libro.cantidadEjemplares > 0) {
+                                setDeleteTarget(libro);
+                                setSelectedEjemplares(new Set());
+                              } else {
+                                toast(`¿Eliminar "${libro.titulo}"?`, {
+                                  description: 'Esta acción no se puede deshacer.',
+                                  action: {
+                                    label: 'Eliminar',
+                                    onClick: () => eliminarLibro.mutate({ id: libro.id }),
+                                  },
+                                  duration: 6000,
+                                });
+                              }
                             }}
                             disabled={eliminarLibro.isPending}
                             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
@@ -470,6 +493,96 @@ export default function CatalogoList() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal eliminar ejemplares */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteTarget(null)}>
+          <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+              <div>
+                <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Eliminar ejemplares</h3>
+                <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 mt-1">{deleteTarget.titulo}</p>
+              </div>
+              <button onClick={() => setDeleteTarget(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[50vh]">
+              {deleteEjemplaresData?.ejemplares.length === 0 ? (
+                <p className="text-center text-slate-400 font-semibold py-8">No hay ejemplares para eliminar.</p>
+              ) : (
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedEjemplares.size === deleteEjemplaresData?.ejemplares.length}
+                      onChange={() => {
+                        if (selectedEjemplares.size === deleteEjemplaresData?.ejemplares.length) {
+                          setSelectedEjemplares(new Set());
+                        } else {
+                          setSelectedEjemplares(new Set(deleteEjemplaresData?.ejemplares.map(e => e.id)));
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="font-bold text-slate-700 dark:text-slate-300">Seleccionar todos</span>
+                  </label>
+                  <div className="border-t border-slate-100 dark:border-slate-700 pt-2 space-y-1">
+                    {deleteEjemplaresData?.ejemplares.map(ej => (
+                      <label key={ej.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={selectedEjemplares.has(ej.id)}
+                          onChange={() => {
+                            const next = new Set(selectedEjemplares);
+                            if (next.has(ej.id)) next.delete(ej.id);
+                            else next.add(ej.id);
+                            setSelectedEjemplares(next);
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</p>
+                          <p className="text-xs text-slate-400">
+                            {ej.tipoMaterial || '—'} · {ej.ubicacion || '—'} · {ej.estado}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+              <button
+                type="button"
+                onClick={() => {
+                  toast(`¿Eliminar todo el libro "${deleteTarget.titulo}"?`, {
+                    description: 'Se eliminarán todos los ejemplares y el libro.',
+                    action: {
+                      label: 'Eliminar todo',
+                      onClick: () => eliminarLibro.mutate({ id: deleteTarget.id }),
+                    },
+                    duration: 6000,
+                  });
+                  setDeleteTarget(null);
+                }}
+                className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"
+              >
+                Eliminar libro completo
+              </button>
+              <button
+                type="button"
+                disabled={selectedEjemplares.size === 0 || eliminarEjemplares.isPending}
+                onClick={() => eliminarEjemplares.mutate({ ids: Array.from(selectedEjemplares) })}
+                className="px-6 py-2.5 bg-rose-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-rose-700 transition-all active:scale-95 disabled:opacity-50"
+              >
+                {eliminarEjemplares.isPending ? 'Eliminando...' : `Eliminar ${selectedEjemplares.size} ejemplar${selectedEjemplares.size !== 1 ? 'es' : ''}`}
+              </button>
             </div>
           </div>
         </div>

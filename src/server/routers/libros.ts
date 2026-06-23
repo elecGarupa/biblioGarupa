@@ -279,6 +279,14 @@ export const librosRouter = router({
       });
     }),
 
+  deleteEjemplares: publicProcedure
+    .input(z.object({ ids: z.array(z.string()) }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.ejemplar.deleteMany({
+        where: { id: { in: input.ids } },
+      });
+    }),
+
   buscar: publicProcedure
     .input(z.object({ q: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
