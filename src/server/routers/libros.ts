@@ -1,6 +1,93 @@
 import { z } from 'zod';
 import { router, publicProcedure } from '../trpc';
 
+const subjectTranslations: Record<string, string> = {
+  'fiction': 'Ficción',
+  'nonfiction': 'No ficción',
+  'classic': 'Clásico',
+  'classic literature': 'Literatura clásica',
+  'literary': 'Literatura',
+  'literature': 'Literatura',
+  'science': 'Ciencia',
+  'history': 'Historia',
+  'biography': 'Biografía',
+  'biography & autobiography': 'Biografía y autobiografía',
+  'autobiography': 'Autobiografía',
+  'philosophy': 'Filosofía',
+  'psychology': 'Psicología',
+  'social science': 'Ciencias sociales',
+  'sociology': 'Sociología',
+  'technology': 'Tecnología',
+  'engineering': 'Ingeniería',
+  'art': 'Arte',
+  'music': 'Música',
+  'religion': 'Religión',
+  'travel': 'Viajes',
+  'cooking': 'Cocina',
+  'cooking & food': 'Cocina y gastronomía',
+  'health': 'Salud',
+  'medicine': 'Medicina',
+  'education': 'Educación',
+  'self-help': 'Autoayuda',
+  'business': 'Negocios',
+  'economics': 'Economía',
+  'law': 'Derecho',
+  'political science': 'Ciencias políticas',
+  'politics': 'Política',
+  'geography': 'Geografía',
+  'nature': 'Naturaleza',
+  'environment': 'Medio ambiente',
+  'reference': 'Referencia',
+  'encyclopedia': 'Enciclopedia',
+  'dictionary': 'Diccionario',
+  'poetry': 'Poesía',
+  'drama': 'Teatro',
+  'comedy': 'Comedia',
+  'horror': 'Terror',
+  'mystery': 'Misterio',
+  'thriller': 'Suspenso',
+  'romance': 'Romance',
+  'fantasy': 'Fantasía',
+  'science fiction': 'Ciencia ficción',
+  'adventure': 'Aventura',
+  'western': 'Western',
+  'short stories': 'Cuentos',
+  'essays': 'Ensayos',
+  'juvenile fiction': 'Ficción juvenil',
+  'young adult': 'Juvenil',
+  'children': 'Infantil',
+  'children\'s literature': 'Literatura infantil',
+  'comics & graphic novels': 'Cómics y novelas gráficas',
+  'graphic novels': 'Novelas gráficas',
+  'mathematics': 'Matemáticas',
+  'physics': 'Física',
+  'chemistry': 'Química',
+  'biology': 'Biología',
+  'astronomy': 'Astronomía',
+  'computer science': 'Informática',
+  'programming': 'Programación',
+  'architecture': 'Arquitectura',
+  'design': 'Diseño',
+  'photography': 'Fotografía',
+  'sports': 'Deportes',
+  'gardening': 'Jardinería',
+  'pets': 'Mascotas',
+  'house & home': 'Hogar',
+  'family': 'Familia',
+  'parenting': 'Crianza',
+};
+
+function translateSubjects(subjects: string): string {
+  if (!subjects) return subjects;
+  return subjects.split(',').map(s => {
+    const trimmed = s.trim().toLowerCase();
+    const translated = subjectTranslations[trimmed];
+    if (translated) return translated;
+    // intentar con mayúscula inicial
+    return s.trim();
+  }).join(', ');
+}
+
 // Schema Zod compartido para los campos MARC 21 + campos extra
 const libroFieldsSchema = z.object({
   isbn: z.string().optional(),                  // MARC 020
@@ -237,7 +324,7 @@ export const librosRouter = router({
                 portadaUrl: edition.cover?.large || edition.cover?.medium || edition.cover?.small || '',
                 descripcionFisica: edition.number_of_pages ? `${edition.number_of_pages} p.` : '',
                 idioma: edition.languages?.[0]?.key?.replace('/languages/', '') || '',
-                temas: (edition.subjects || []).join(', '),
+                temas: translateSubjects((edition.subjects || []).join(', ')),
               };
             }
           }
@@ -264,7 +351,7 @@ export const librosRouter = router({
             portadaUrl: info.imageLinks?.thumbnail?.replace('http:', 'https:') || '',
             descripcionFisica: info.pageCount ? `${info.pageCount} p.` : '',
             idioma: info.language || '',
-            temas: info.categories?.join(', ') || '',
+            temas: translateSubjects(info.categories?.join(', ') || ''),
           };
         }
       } catch (error: any) {
@@ -304,7 +391,7 @@ export const librosRouter = router({
             anioPublicacion = info.publishedDate?.split('-')[0] || '';
             editorial = info.publisher || '';
             idioma = info.language || '';
-            temas = info.categories?.join(', ') || '';
+            temas = translateSubjects(info.categories?.join(', ') || '');
             portadaUrl = info.imageLinks?.thumbnail?.replace('http:', 'https:') || '';
             descripcionFisica = info.pageCount ? `${info.pageCount} p.` : '';
             found = true;
@@ -333,7 +420,7 @@ export const librosRouter = router({
               anioPublicacion = info.publish_date?.match(/\d{4}/)?.[0] || '';
               editorial = info.publishers?.map((p: any) => p.name).join(', ') || '';
               lugarPublicacion = info.publish_places?.map((p: any) => p.name).join(', ') || '';
-              temas = info.subjects?.map((s: any) => s.name).join(', ') || '';
+              temas = translateSubjects(info.subjects?.map((s: any) => s.name).join(', ') || '');
               portadaUrl = info.cover?.large || info.cover?.medium || info.cover?.small || '';
               descripcionFisica = info.number_of_pages ? `${info.number_of_pages} p.` : '';
               found = true;
