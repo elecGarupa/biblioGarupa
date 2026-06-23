@@ -168,7 +168,7 @@ export default function CatalogoList() {
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-14 bg-slate-100 dark:bg-slate-700 rounded-lg flex-shrink-0 flex items-center justify-center border border-slate-200 dark:border-slate-600 overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                              {libro.portadaUrl ? (
-                                <img src={libro.portadaUrl} alt={libro.titulo || 'Portada'} className="w-full h-full object-cover" />
+                                <img src={libro.portadaUrl} alt={libro.titulo || 'Portada'} className="w-full h-full object-contain" />
                               ) : (
                                 <BookOpen size={20} className="text-slate-300 dark:text-slate-500" />
                               )}
@@ -318,7 +318,7 @@ export default function CatalogoList() {
                     onMouseLeave={() => setHoverCover(false)}
                   >
                     {detalleLibro.portadaUrl ? (
-                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || 'Portada'} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || 'Portada'} className="w-full h-full object-contain transition-transform duration-300 hover:scale-105" />
                     ) : (
                       <Book size={48} className="text-slate-300 dark:text-slate-500" />
                     )}
@@ -328,7 +328,7 @@ export default function CatalogoList() {
                       className="fixed z-[9999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200"
                       style={{ left: coverRect.right + 24, top: coverRect.top }}
                     >
-                      <img src={detalleLibro.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-cover block" />
+                      <img src={detalleLibro.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-contain block" />
                     </div>,
                     document.body
                   )}

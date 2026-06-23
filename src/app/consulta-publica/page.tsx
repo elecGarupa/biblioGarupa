@@ -120,7 +120,7 @@ export default function ConsultaPublica() {
                   {/* Cover */}
                   <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-700 relative overflow-hidden">
                     {libro.portadaUrl ? (
-                      <img src={libro.portadaUrl} alt={libro.titulo || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={libro.portadaUrl} alt={libro.titulo || ''} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <BookOpen size={48} className="text-slate-300 dark:text-slate-500" />
@@ -216,7 +216,7 @@ export default function ConsultaPublica() {
                 <div className="flex-shrink-0">
                   <div className="w-44 h-64 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg flex items-center justify-center">
                     {detalleLibro.portadaUrl ? (
-                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || ''} className="w-full h-full object-cover" />
+                      <img src={detalleLibro.portadaUrl} alt={detalleLibro.titulo || ''} className="w-full h-full object-contain" />
                     ) : (
                       <BookOpen size={48} className="text-slate-300 dark:text-slate-500" />
                     )}

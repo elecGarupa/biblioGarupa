@@ -256,7 +256,7 @@ export default function PrestamosPage() {
               <div className="flex gap-6">
                 <div className="w-24 h-36 bg-slate-100 dark:bg-slate-700 rounded-2xl flex-shrink-0 shadow-lg border-4 border-white dark:border-slate-800 flex items-center justify-center overflow-hidden">
                    {selectedLibro?.portadaUrl ? (
-                      <img src={selectedLibro.portadaUrl} alt={selectedLibro.titulo || ''} className="w-full h-full object-cover" />
+                      <img src={selectedLibro.portadaUrl} alt={selectedLibro.titulo || ''} className="w-full h-full object-contain" />
                    ) : selectedLibro ? (
                       <div className="text-center p-2">
                         <BookOpen size={32} className="text-indigo-200 mx-auto mb-2" />

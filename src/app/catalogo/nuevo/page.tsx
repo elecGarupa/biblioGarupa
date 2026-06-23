@@ -288,7 +288,7 @@ export default function NuevoLibro() {
                 >
                   <div className="w-48 h-64 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border-4 border-dashed border-slate-200 dark:border-slate-600 overflow-hidden transition-all group-hover:border-indigo-300 group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-500/10 shadow-inner cursor-pointer">
                     {formData.portadaUrl ? (
-                      <img src={formData.portadaUrl} alt="Portada" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                      <img src={formData.portadaUrl} alt="Portada" className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" />
                     ) : (
                       <Book size={64} className="text-slate-300 dark:text-slate-600 group-hover:text-indigo-300 transition-colors" />
                     )}
@@ -299,7 +299,7 @@ export default function NuevoLibro() {
                       className="fixed z-[9999] bg-white rounded-2xl shadow-[0_20px_60px_-10px_#000] border-2 border-slate-200"
                       style={{ left: coverRect.right + 24, top: coverRect.top }}
                     >
-                      <img src={formData.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-cover block" />
+                      <img src={formData.portadaUrl} alt="Portada preview" className="w-72 h-96 rounded-2xl object-contain block" />
                     </div>,
                     document.body
                   )}
@@ -693,7 +693,7 @@ export default function NuevoLibro() {
                 >
                   <div className="w-14 h-20 rounded-lg bg-slate-50 dark:bg-slate-700 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-600">
                     {book.portadaUrl ? (
-                      <img src={book.portadaUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={book.portadaUrl} alt="" className="w-full h-full object-contain" />
                     ) : (
                       <Book size={24} className="text-slate-300 dark:text-slate-500" />
                     )}
