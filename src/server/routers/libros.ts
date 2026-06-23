@@ -295,7 +295,7 @@ export const librosRouter = router({
       // 1. Google Books API
       try {
         const query = buildQuery().replace(/ /g, '+');
-        const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&projection=full`;
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=10&projection=full&key=${process.env.GOOGLE_BOOKS_API_KEY}`;
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
@@ -382,7 +382,7 @@ export const librosRouter = router({
         return null;
       }
       try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${input.id}`);
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${input.id}?key=${process.env.GOOGLE_BOOKS_API_KEY}`);
         if (response.ok) {
           const data = await response.json();
           const info = data.volumeInfo;
@@ -428,7 +428,7 @@ export const librosRouter = router({
       // 1. Intentar con Google Books API
       try {
         console.log(`Intentando buscar ISBN ${cleanIsbn} en Google Books...`);
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanIsbn}`);
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanIsbn}&key=${process.env.GOOGLE_BOOKS_API_KEY}`);
         if (response.ok) {
           const data = await response.json();
           if (data.items && data.items.length > 0) {
