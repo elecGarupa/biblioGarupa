@@ -47,7 +47,7 @@ model Libro {
   id                 String     @id @default(cuid())
 
   // --- Campos MARC 21 ---
-  isbn               String?    @unique // MARC 020 - ISBN
+  isbn               String?    // MARC 020 - ISBN
   idioma             String?    // MARC 041 - Código de idioma (ej: "es", "en")
   clasificacion      String?    // MARC 080 - CDU (Clasificación Decimal Universal)
   autor              String?    // MARC 100 - Autor principal (Apellido, Nombre)
