@@ -56,6 +56,7 @@ export default function LibroDetail() {
     temas: '',
     descriptores: '',
     colaboradores: '',
+    volumen: '',
   });
 
   const updateLibro = trpc.libros.update.useMutation({
@@ -101,6 +102,7 @@ export default function LibroDetail() {
       temas: libro.temas || '',
       descriptores: libro.descriptores || '',
       colaboradores: libro.colaboradores || '',
+      volumen: libro.volumen || '',
     });
     setIsEditing(true);
   };
@@ -205,6 +207,7 @@ export default function LibroDetail() {
                     <EditField icon={<User size={18} />} label="Autor" value={form.autor} onChange={(v) => setForm(f => ({ ...f, autor: v }))} />
                     <EditField icon={<Building2 size={18} />} label="Autor Institucional" value={form.autorInstitucional} onChange={(v) => setForm(f => ({ ...f, autorInstitucional: v }))} />
                     <EditField icon={<BookCopy size={18} />} label="Edición" value={form.edicion} onChange={(v) => setForm(f => ({ ...f, edicion: v }))} />
+                    <EditField icon={<BookMarked size={18} />} label="Volumen" value={form.volumen} onChange={(v) => setForm(f => ({ ...f, volumen: v }))} />
                   </>
                 ) : (
                   <>
@@ -215,6 +218,7 @@ export default function LibroDetail() {
                     <InfoRow icon={<User size={18} />} label="Autor" value={libro.autor || '—'} />
                     <InfoRow icon={<Building2 size={18} />} label="Autor Institucional" value={libro.autorInstitucional || '—'} />
                     <InfoRow icon={<BookCopy size={18} />} label="Edición" value={libro.edicion || '—'} />
+                    {libro.volumen && <InfoRow icon={<BookMarked size={18} />} label="Volumen" value={libro.volumen} />}
                       <InfoRow icon={<Layers size={18} />} label="Ejemplares" value={String(libro.cantidadEjemplares)} />
                       <div className="flex items-center gap-3 pt-2">
                         <span className="text-sm font-bold text-slate-400">{libro.ejemplares?.length ?? 0} ejemplar{(libro.ejemplares?.length ?? 0) !== 1 ? 'es' : ''}</span>

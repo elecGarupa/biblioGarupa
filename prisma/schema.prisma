@@ -63,6 +63,7 @@ model Libro {
   descriptores       String?    // MARC 653 - Descriptores no controlados (separados por coma)
   colaboradores      String?    // MARC 700 - Autores secundarios (separados por coma)
   bibliotecario      String?    // MARC 900 - Bibliotecario responsable del registro
+  volumen            String?    // Número de volumen (ej: "1", "2")
 
   // --- Campos extra (fuera de MARC) ---
   inventario         String?    // [Deprecado] Usar ejemplares

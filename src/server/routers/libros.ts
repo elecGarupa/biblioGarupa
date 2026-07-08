@@ -161,6 +161,7 @@ const libroFieldsSchema = z.object({
   descriptores: z.string().optional(),          // MARC 653
   colaboradores: z.string().optional(),         // MARC 700
   bibliotecario: z.string().optional(),         // MARC 900
+  volumen: z.string().optional(),                // Número de volumen
   inventario: z.string().optional(),            // Extra - Nº inventario (deprecado)
   tipoMaterial: z.string().optional(),          // Extra (deprecado, usar ejemplares)
   ubicacion: z.string().optional(),             // Extra (deprecado, usar ejemplares)

@@ -115,6 +115,7 @@ export default function NuevoLibro() {
     tipoMaterial: '',
     ubicacion: '',
     portadaUrl: '',
+    volumen: '',
   });
   const [ejemplares, setEjemplares] = useState<{ codigoInterno: string; tipoMaterial: string; ubicacion: string; codigoEstante: string }[]>([]);
   const [nuevoEjemplar, setNuevoEjemplar] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
@@ -477,6 +478,17 @@ export default function NuevoLibro() {
                         onChange={handleChange}
                         className={inputClasses}
                         placeholder="Ej: 6a. ed." 
+                        type="text"
+                      />
+                    </FormField>
+
+                    <FormField label="Volumen" icon={BookCopy}>
+                      <input 
+                        name="volumen"
+                        value={formData.volumen}
+                        onChange={handleChange}
+                        className={inputClasses}
+                        placeholder="Ej: 1 (dejar vacío si no aplica)" 
                         type="text"
                       />
                     </FormField>

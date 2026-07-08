@@ -18,6 +18,7 @@ import {
   X,
   Hash,
   Book,
+  BookMarked,
   User,
   Building2,
   Globe,
@@ -149,6 +150,7 @@ export default function CatalogoList() {
                 <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700">
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ISBN / Código</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Título</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Vol.</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Autor</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Editorial</th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Stock</th>
@@ -160,23 +162,23 @@ export default function CatalogoList() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
-                      <td colSpan={7} className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-14 skeleton rounded-lg flex-shrink-0"></div>
-                          <div className="flex-1 space-y-2">
-                            <div className="h-4 w-3/4 skeleton rounded"></div>
-                            <div className="h-3 w-1/3 skeleton rounded"></div>
+                      <td colSpan={8} className="px-8 py-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-14 skeleton rounded-lg flex-shrink-0"></div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-4 w-3/4 skeleton rounded"></div>
+                              <div className="h-3 w-1/3 skeleton rounded"></div>
+                            </div>
+                            <div className="h-3 w-20 skeleton rounded hidden md:block"></div>
+                            <div className="h-3 w-16 skeleton rounded hidden md:block"></div>
+                            <div className="h-6 w-10 skeleton rounded-full"></div>
                           </div>
-                          <div className="h-3 w-20 skeleton rounded hidden md:block"></div>
-                          <div className="h-3 w-16 skeleton rounded hidden md:block"></div>
-                          <div className="h-6 w-10 skeleton rounded-full"></div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : libros?.length === 0 ? (
-                  <tr>
-                      <td colSpan={7} className="px-8 py-12 text-center text-slate-400 dark:text-slate-500 font-semibold">
+                        </td>
+                      </tr>
+                    ))
+                  ) : libros?.length === 0 ? (
+                    <tr>
+                        <td colSpan={8} className="px-8 py-12 text-center text-slate-400 dark:text-slate-500 font-semibold">
                       No hay libros registrados en el inventario.
                     </td>
                   </tr>
@@ -200,6 +202,9 @@ export default function CatalogoList() {
                             {libro.anioPublicacion && <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 mt-0.5">{libro.anioPublicacion}</p>}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-8 py-6 text-sm text-slate-500 dark:text-slate-400 font-semibold text-center">
+                        {libro.volumen || '—'}
                       </td>
                       <td className="px-8 py-6 text-sm text-slate-600 dark:text-slate-400 font-semibold">
                         {libro.autor || <span className="text-slate-300 dark:text-slate-600">—</span>}
@@ -373,6 +378,9 @@ export default function CatalogoList() {
                     )}
                     {detalleLibro.edicion && (
                       <DetailField icon={<FileText size={14} />} label="Edición" value={detalleLibro.edicion} />
+                    )}
+                    {detalleLibro.volumen && (
+                      <DetailField icon={<BookMarked size={14} />} label="Volumen" value={detalleLibro.volumen} />
                     )}
                     {detalleLibro.idioma && (
                       <DetailField icon={<Globe size={14} />} label="Idioma" value={detalleLibro.idioma} />
