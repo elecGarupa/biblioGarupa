@@ -117,7 +117,7 @@ export default function CatalogoList() {
         {/* Actions Bar */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-wrap items-center gap-4">
-            <div className="relative group flex-grow max-w-lg">
+            <div className="relative group flex-grow max-w-2xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
               <input 
                 type="text" 
