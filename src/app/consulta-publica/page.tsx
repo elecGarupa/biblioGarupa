@@ -60,7 +60,7 @@ export default function ConsultaPublica() {
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-indigo-300 group-focus-within:text-white transition-colors" size={22} />
             <input
               type="text"
-              placeholder="Buscá por título, autor, ISBN o tema..."
+              placeholder="Buscá por título, autor, ISBN, código interno o tema..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/10 backdrop-blur border border-white/20 focus:border-white/50 focus:ring-4 focus:ring-white/20 rounded-2xl py-5 pl-14 pr-6 outline-none transition-all text-white placeholder-indigo-200 font-bold text-lg"

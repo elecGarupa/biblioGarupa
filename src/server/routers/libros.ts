@@ -197,6 +197,7 @@ export const librosRouter = router({
           { temas: { contains: search, mode: 'insensitive' } },
           { editorial: { contains: search, mode: 'insensitive' } },
           { colaboradores: { contains: search, mode: 'insensitive' } },
+          { ejemplares: { some: { codigoInterno: { contains: search, mode: 'insensitive' } } } },
         ];
       }
 
