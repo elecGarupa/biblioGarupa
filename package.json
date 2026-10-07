@@ -54,5 +54,8 @@
       "@prisma/engines",
       "prisma"
     ]
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only -P prisma/tsconfig.seed.json prisma/seed.ts"
   }
 }

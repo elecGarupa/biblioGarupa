@@ -38,6 +38,7 @@ yarn-error.log*
 coverage/
 
 # Archivos con credenciales en texto plano
+supabase
 supabaseBD
 
 # Documentación / diseño / notas que no forman parte del proyecto

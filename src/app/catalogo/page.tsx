@@ -7,7 +7,8 @@ import {
   BookOpen, 
   Search, 
   Plus, 
-  Edit2, 
+  Edit2,
+  Edit3, 
   Trash2, 
   ChevronLeft,
   ChevronRight,
@@ -56,6 +57,10 @@ export default function CatalogoList() {
     { id: deleteTarget?.id ?? '' },
     { enabled: !!deleteTarget },
   );
+  const { data: deleteInfo } = trpc.libros.deleteInfo.useQuery(
+    { id: deleteTarget?.id ?? '' },
+    { enabled: !!deleteTarget },
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -90,7 +95,7 @@ export default function CatalogoList() {
   });
 
   return (
-    <MainLayout title="Inventario Bibliográfico">
+    <MainLayout title="Inventario Bibliográfico" shortTitle="Inventario">
       <div className="space-y-8">
         {/* Stats Bento Style */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -316,13 +321,22 @@ export default function CatalogoList() {
                 <BookOpen size={22} className="text-indigo-600" />
                 <h3 className="text-lg font-black text-slate-900 dark:text-white">Detalle del Libro</h3>
               </div>
-              <button onClick={() => setDetalleLibro(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/catalogo/${detalleLibro.id}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all"
+                >
+                  <Edit3 size={14} />
+                  Editar / Eliminar
+                </Link>
+                <button onClick={() => setDetalleLibro(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
-            <div className="p-8 overflow-y-auto max-h-[75vh]">
+            <div className="p-4 md:p-8 overflow-y-auto max-h-[75vh]">
               <div className="flex flex-col md:flex-row gap-8">
                 {/* Cover */}
                 <div className="flex-shrink-0">
@@ -554,23 +568,31 @@ export default function CatalogoList() {
               )}
             </div>
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-              <button
-                type="button"
-                onClick={() => {
-                  toast(`¿Eliminar todo el libro "${deleteTarget.titulo}"?`, {
-                    description: 'Se eliminarán todos los ejemplares y el libro.',
-                    action: {
-                      label: 'Eliminar todo',
-                      onClick: () => eliminarLibro.mutate({ id: deleteTarget.id }),
-                    },
-                    duration: 6000,
-                  });
-                  setDeleteTarget(null);
-                }}
-                className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all"
-              >
-                Eliminar libro completo
-              </button>
+              <div className="flex flex-col gap-1">
+                {(deleteInfo?.prestamos ?? 0) > 0 ? (
+                  <p className="text-xs font-bold text-amber-600 dark:text-amber-400 max-w-[220px]">
+                    Tiene {deleteInfo?.prestamos} préstamo{(deleteInfo?.prestamos ?? 0) !== 1 ? 's' : ''} registrado{(deleteInfo?.prestamos ?? 0) !== 1 ? 's' : ''}: no se puede eliminar el libro completo.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toast(`¿Eliminar todo el libro "${deleteTarget.titulo}"?`, {
+                        description: 'Se eliminarán todos los ejemplares y el libro.',
+                        action: {
+                          label: 'Eliminar todo',
+                          onClick: () => eliminarLibro.mutate({ id: deleteTarget.id }),
+                        },
+                        duration: 6000,
+                      });
+                      setDeleteTarget(null);
+                    }}
+                    className="px-4 py-2 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all text-left"
+                  >
+                    Eliminar libro completo
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 disabled={selectedEjemplares.size === 0 || eliminarEjemplares.isPending}

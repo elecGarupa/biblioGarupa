@@ -27,9 +27,11 @@ import {
   Tag,
   Users,
   StickyNote,
-  Layers,
   Plus,
   Library,
+  Trash2,
+  Image as ImageIcon,
+  Search,
 } from 'lucide-react';
 export default function LibroDetail() {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +40,9 @@ export default function LibroDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [showAddEjemplar, setShowAddEjemplar] = useState(false);
   const [nuevoEj, setNuevoEj] = useState({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
+  const [editEj, setEditEj] = useState<{ id: string; codigoInterno: string; tipoMaterial: string; ubicacion: string; codigoEstante: string; estado: string } | null>(null);
   const { data: libro, isLoading } = trpc.libros.getById.useQuery({ id });
+  const { data: deleteInfo } = trpc.libros.deleteInfo.useQuery({ id });
 
   const [form, setForm] = useState({
     isbn: '',
@@ -57,6 +61,7 @@ export default function LibroDetail() {
     descriptores: '',
     colaboradores: '',
     volumen: '',
+    portadaUrl: '',
   });
 
   const updateLibro = trpc.libros.update.useMutation({
@@ -84,6 +89,39 @@ export default function LibroDetail() {
     },
   });
 
+  const editEjemplar = trpc.libros.updateEjemplar.useMutation({
+    onSuccess: () => {
+      toast.success('Ejemplar actualizado', { duration: 3000 });
+      utils.libros.getById.invalidate({ id });
+      utils.libros.getAll.invalidate();
+      setEditEj(null);
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
+
+  const eliminarLibro = trpc.libros.delete.useMutation({
+    onSuccess: () => {
+      toast.success('Libro eliminado del inventario', { duration: 3000 });
+      router.push('/catalogo');
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
+
+  const eliminarEjemplar = trpc.libros.deleteEjemplares.useMutation({
+    onSuccess: () => {
+      toast.success('Ejemplar eliminado', { duration: 3000 });
+      utils.libros.getById.invalidate({ id });
+      utils.libros.getAll.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
+
   const startEditing = () => {
     if (!libro) return;
     setForm({
@@ -103,9 +141,24 @@ export default function LibroDetail() {
       descriptores: libro.descriptores || '',
       colaboradores: libro.colaboradores || '',
       volumen: libro.volumen || '',
+      portadaUrl: libro.portadaUrl || '',
     });
     setIsEditing(true);
   };
+
+  const buscarPortada = trpc.libros.getByIsbnExternal.useMutation({
+    onSuccess: (data) => {
+      if (data?.portadaUrl) {
+        setForm(f => ({ ...f, portadaUrl: data.portadaUrl as string }));
+        toast.success('Portada encontrada', { duration: 3000 });
+      } else {
+        toast.error('No se encontró portada para ese ISBN', { duration: 4000 });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message, { duration: 4000 });
+    },
+  });
 
   const handleSave = () => {
     updateLibro.mutate({ id, ...form });
@@ -113,7 +166,7 @@ export default function LibroDetail() {
 
   if (isLoading) {
     return (
-      <MainLayout title="Detalle del Libro">
+      <MainLayout title="Detalle del Libro" shortTitle="Libro">
         <div className="space-y-8">
           <div className="h-8 w-48 skeleton rounded-xl" />
           <div className="h-64 skeleton rounded-[2rem]" />
@@ -130,7 +183,7 @@ export default function LibroDetail() {
 
   if (!libro) {
     return (
-      <MainLayout title="Detalle del Libro">
+      <MainLayout title="Detalle del Libro" shortTitle="Libro">
         <div className="text-center py-20">
           <p className="text-slate-400 font-semibold">Libro no encontrado</p>
         </div>
@@ -139,7 +192,7 @@ export default function LibroDetail() {
   }
 
   return (
-    <MainLayout title="Detalle del Libro">
+    <MainLayout title="Detalle del Libro" shortTitle="Libro">
       <div className="max-w-5xl mx-auto space-y-10">
         <div className="flex items-center justify-between">
           <button
@@ -150,13 +203,41 @@ export default function LibroDetail() {
             Volver al inventario
           </button>
           {!isEditing ? (
-            <button
-              onClick={startEditing}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
-            >
-              <Edit3 size={16} />
-              Editar Libro
-            </button>
+            <div className="flex items-center gap-3">
+              {(deleteInfo?.prestamos ?? 0) > 0 ? (
+                <span
+                  className="px-5 py-2.5 text-slate-400 font-bold text-sm cursor-not-allowed"
+                  title={`Tiene ${deleteInfo?.prestamos} préstamo(s) registrado(s): no se puede eliminar`}
+                >
+                  No eliminable
+                </span>
+              ) : (
+                <button
+                  onClick={() => {
+                    toast(`¿Eliminar "${libro.titulo || 'este libro'}"?`, {
+                      description: 'Se eliminarán todos los ejemplares y el libro.',
+                      action: {
+                        label: 'Eliminar',
+                        onClick: () => eliminarLibro.mutate({ id }),
+                      },
+                      duration: 6000,
+                    });
+                  }}
+                  disabled={eliminarLibro.isPending}
+                  className="flex items-center gap-2 px-5 py-2.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+                >
+                  <Trash2 size={16} />
+                  Eliminar
+                </button>
+              )}
+              <button
+                onClick={startEditing}
+                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 dark:shadow-indigo-900/30"
+              >
+                <Edit3 size={16} />
+                Editar Libro
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <button
@@ -179,10 +260,14 @@ export default function LibroDetail() {
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-10 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-5 md:p-10 text-white relative overflow-hidden">
             <div className="relative z-10 flex items-center gap-8">
-              <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-3xl font-black backdrop-blur-sm">
-                <BookOpen size={36} />
+              <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-3xl font-black backdrop-blur-sm overflow-hidden flex-shrink-0">
+                {libro.portadaUrl ? (
+                  <img src={libro.portadaUrl} alt="Portada" className="w-full h-full object-cover" />
+                ) : (
+                  <BookOpen size={36} />
+                )}
               </div>
               <div>
                 <h2 className="text-3xl font-black font-display">{libro.titulo || 'Sin título'}</h2>
@@ -192,7 +277,7 @@ export default function LibroDetail() {
             <Sparkles className="absolute -right-6 -bottom-6 text-white/10" size={160} />
           </div>
 
-          <div className="p-10">
+          <div className="p-5 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
               <div className="space-y-6">
                 <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-700 pb-3">
@@ -201,6 +286,27 @@ export default function LibroDetail() {
                 {isEditing ? (
                   <>
                     <EditField icon={<Barcode size={18} />} label="ISBN" value={form.isbn} onChange={(v) => setForm(f => ({ ...f, isbn: v }))} />
+                    <div className="flex items-start gap-3">
+                      <div className="w-16 h-24 rounded-lg bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        {form.portadaUrl ? (
+                          <img src={form.portadaUrl} alt="Portada" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon size={24} className="text-slate-300 dark:text-slate-600" />
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <EditField icon={<ImageIcon size={18} />} label="URL de Portada" value={form.portadaUrl} onChange={(v) => setForm(f => ({ ...f, portadaUrl: v }))} />
+                        <button
+                          type="button"
+                          onClick={() => form.isbn.trim() ? buscarPortada.mutate({ isbn: form.isbn.trim() }) : toast.error('Primero cargá el ISBN')}
+                          disabled={buscarPortada.isPending}
+                          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all disabled:opacity-50"
+                        >
+                          <Search size={14} />
+                          {buscarPortada.isPending ? 'Buscando...' : 'Buscar portada por ISBN'}
+                        </button>
+                      </div>
+                    </div>
                     <EditField icon={<Globe size={18} />} label="Idioma" value={form.idioma} onChange={(v) => setForm(f => ({ ...f, idioma: v }))} />
                     <EditField icon={<Hash size={18} />} label="CDU (Clasificación)" value={form.clasificacion} onChange={(v) => setForm(f => ({ ...f, clasificacion: v }))} />
                     <EditField icon={<BookMarked size={18} />} label="Título" value={form.titulo} onChange={(v) => setForm(f => ({ ...f, titulo: v }))} />
@@ -219,20 +325,6 @@ export default function LibroDetail() {
                     <InfoRow icon={<Building2 size={18} />} label="Autor Institucional" value={libro.autorInstitucional || '—'} />
                     <InfoRow icon={<BookCopy size={18} />} label="Edición" value={libro.edicion || '—'} />
                     {libro.volumen && <InfoRow icon={<BookMarked size={18} />} label="Volumen" value={libro.volumen} />}
-                      <InfoRow icon={<Layers size={18} />} label="Ejemplares" value={String(libro.cantidadEjemplares)} />
-                      <div className="flex items-center gap-3 pt-2">
-                        <span className="text-sm font-bold text-slate-400">{libro.ejemplares?.length ?? 0} ejemplar{(libro.ejemplares?.length ?? 0) !== 1 ? 'es' : ''}</span>
-                        <button
-                          onClick={() => {
-                            setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
-                            setShowAddEjemplar(true);
-                          }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
-                        >
-                          <Plus size={14} />
-                          Agregar
-                        </button>
-                      </div>
                   </>
                 )}
               </div>
@@ -268,13 +360,25 @@ export default function LibroDetail() {
             </div>
 
             {/* Ejemplares */}
-            {!isEditing && libro.ejemplares && libro.ejemplares.length > 0 && (
-              <div className="px-10 pb-10">
-                <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
-                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Library size={14} /> Ejemplares ({libro.ejemplares.length})
+            <div className="px-4 md:px-10 pb-4 md:pb-10">
+              <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Library size={14} /> Ejemplares ({libro.ejemplares?.length ?? 0})
                   </h3>
-                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => {
+                      setNuevoEj({ codigoInterno: '', tipoMaterial: '', ubicacion: '', codigoEstante: '' });
+                      setShowAddEjemplar(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all"
+                  >
+                    <Plus size={14} />
+                    Agregar
+                  </button>
+                </div>
+                {(libro.ejemplares?.length ?? 0) > 0 ? (
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-slate-800/50">
@@ -283,10 +387,11 @@ export default function LibroDetail() {
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Ubicación</th>
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Detalles</th>
                           <th className="text-left px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Estado</th>
+                          <th className="text-center px-4 py-2.5 font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest">Acción</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                        {libro.ejemplares.map(ej => (
+                        {(libro.ejemplares ?? []).map(ej => (
                           <tr key={ej.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                             <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">{ej.codigoInterno}</td>
                             <td className="px-4 py-2.5 text-slate-500 dark:text-slate-400">{ej.tipoMaterial || '—'}</td>
@@ -301,23 +406,44 @@ export default function LibroDetail() {
                                   : 'bg-slate-100 dark:bg-slate-700 text-slate-500'
                               }`}>{ej.estado}</span>
                             </td>
+                            <td className="px-4 py-2.5 text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => setEditEj({ id: ej.id, codigoInterno: ej.codigoInterno, tipoMaterial: ej.tipoMaterial || '', ubicacion: ej.ubicacion || '', codigoEstante: ej.codigoEstante || '', estado: ej.estado })}
+                                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
+                                  title="Editar ejemplar"
+                                >
+                                  <Edit3 size={16} />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    toast(`¿Eliminar ejemplar "${ej.codigoInterno}"?`, {
+                                      action: {
+                                        label: 'Eliminar',
+                                        onClick: () => eliminarEjemplar.mutate({ ids: [ej.id] }),
+                                      },
+                                      duration: 6000,
+                                    });
+                                  }}
+                                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
+                                  title="Eliminar ejemplar"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Detalles (estante)</p>
-                  <input
-                    value={nuevoEj.codigoEstante}
-                    onChange={e => setNuevoEj(prev => ({ ...prev, codigoEstante: e.target.value }))}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100"
-                    placeholder="Ej: Literatura Infantil 1"
-                  />
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-sm font-semibold text-slate-400 dark:text-slate-500 text-center py-6 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                    Sin ejemplares — usá Agregar para cargar el primero
+                  </p>
+                )}
               </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -384,6 +510,92 @@ export default function LibroDetail() {
                   className="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
                 >
                   {addEjemplar.isPending ? 'Agregando...' : 'Agregar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Modal editar ejemplar */}
+        {editEj && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setEditEj(null)}>
+            <div className="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-md border border-slate-100 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+                <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Editar Ejemplar</h3>
+                <button onClick={() => setEditEj(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all text-slate-400">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Código Interno</p>
+                  <input
+                    value={editEj.codigoInterno}
+                    onChange={e => setEditEj(prev => prev && ({ ...prev, codigoInterno: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Tipo de Material</p>
+                  <select
+                    value={editEj.tipoMaterial}
+                    onChange={e => setEditEj(prev => prev && ({ ...prev, tipoMaterial: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="Libro">Libro</option>
+                    <option value="Folleto">Folleto</option>
+                    <option value="Fotocopia">Fotocopia</option>
+                    <option value="Revista">Revista</option>
+                    <option value="CD/DVD">CD/DVD</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Ubicación</p>
+                  <select
+                    value={editEj.ubicacion}
+                    onChange={e => setEditEj(prev => prev && ({ ...prev, ubicacion: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="En estante">En estante</option>
+                    <option value="Depósito">Depósito</option>
+                    <option value="En reparación">En reparación</option>
+                    <option value="En préstamo">En préstamo</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Detalles (estante)</p>
+                  <input
+                    value={editEj.codigoEstante}
+                    onChange={e => setEditEj(prev => prev && ({ ...prev, codigoEstante: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Ej: Literatura Infantil 1"
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Estado</p>
+                  <select
+                    value={editEj.estado}
+                    onChange={e => setEditEj(prev => prev && ({ ...prev, estado: e.target.value }))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-100 appearance-none cursor-pointer"
+                  >
+                    <option value="DISPONIBLE">Disponible</option>
+                    <option value="PRESTADO">Prestado</option>
+                    <option value="MANTENIMIENTO">Mantenimiento</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+                <button onClick={() => setEditEj(null)} className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
+                  Cancelar
+                </button>
+                <button
+                  disabled={!editEj.codigoInterno || editEjemplar.isPending}
+                  onClick={() => editEjemplar.mutate({ id: editEj.id, codigoInterno: editEj.codigoInterno, tipoMaterial: editEj.tipoMaterial || undefined, ubicacion: editEj.ubicacion || undefined, codigoEstante: editEj.codigoEstante || undefined, estado: editEj.estado as 'DISPONIBLE' | 'PRESTADO' | 'MANTENIMIENTO' })}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {editEjemplar.isPending ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
             </div>

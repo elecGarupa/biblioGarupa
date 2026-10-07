@@ -74,7 +74,7 @@ export default function SocioDetail() {
 
   if (isLoading) {
     return (
-      <MainLayout title="Detalle del Socio">
+      <MainLayout title="Detalle del Socio" shortTitle="Socio">
         <div className="animate-pulse space-y-8">
           <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded-xl" />
           <div className="h-64 bg-slate-200 dark:bg-slate-700 rounded-[2rem]" />
@@ -85,7 +85,7 @@ export default function SocioDetail() {
 
   if (!socio) {
     return (
-      <MainLayout title="Detalle del Socio">
+      <MainLayout title="Detalle del Socio" shortTitle="Socio">
         <div className="text-center py-20">
           <p className="text-slate-400 font-semibold">Socio no encontrado</p>
         </div>
@@ -97,7 +97,7 @@ export default function SocioDetail() {
   const prestamosDevueltos = socio.prestamos.filter(p => p.estado === 'DEVUELTO');
 
   return (
-    <MainLayout title="Detalle del Socio">
+    <MainLayout title="Detalle del Socio" shortTitle="Socio">
       <div className="max-w-5xl mx-auto space-y-10">
         {/* Back + Edit buttons */}
         <div className="flex items-center justify-between">
@@ -139,7 +139,7 @@ export default function SocioDetail() {
 
         {/* Profile Header */}
         <div className="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-10 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-5 md:p-10 text-white relative overflow-hidden">
             <div className="relative z-10 flex items-center gap-8">
               <div className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-3xl font-black backdrop-blur-sm">
                 {socio.nombre[0]}{socio.apellido[0]}
@@ -161,7 +161,7 @@ export default function SocioDetail() {
             <Sparkles className="absolute -right-6 -bottom-6 text-white/10" size={160} />
           </div>
 
-          <div className="p-10">
+          <div className="p-5 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-700 pb-3">

@@ -289,6 +289,34 @@ export const librosRouter = router({
       });
     }),
 
+  deleteInfo: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [ejemplares, prestamos, prestamosActivos] = await Promise.all([
+        ctx.prisma.ejemplar.count({ where: { libroId: input.id } }),
+        ctx.prisma.prestamo.count({ where: { libroId: input.id } }),
+        ctx.prisma.prestamo.count({ where: { libroId: input.id, estado: 'PRESTADO' } }),
+      ]);
+      return { ejemplares, prestamos, prestamosActivos };
+    }),
+
+  updateEjemplar: publicProcedure
+    .input(z.object({
+      id: z.string(),
+      codigoInterno: z.string().min(1).optional(),
+      tipoMaterial: z.string().optional(),
+      ubicacion: z.string().optional(),
+      codigoEstante: z.string().optional(),
+      estado: z.enum(['DISPONIBLE', 'PRESTADO', 'MANTENIMIENTO']).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      return await ctx.prisma.ejemplar.update({
+        where: { id },
+        data,
+      });
+    }),
+
   addEjemplares: publicProcedure
     .input(z.object({
       libroId: z.string(),
@@ -578,6 +606,44 @@ export const librosRouter = router({
           }
         } catch (error: any) {
           console.error('Error al verificar portada directa en Open Library:', error?.message || error);
+        }
+      }
+
+      // 5. Fallback de portada: CDN tap-commerce (cubre libros españoles/argentinos
+      // que no están en Google Books ni Open Library). Responde header itemfound.
+      if (found && !portadaUrl) {
+        try {
+          console.log(`Buscando portada directamente por ISBN ${cleanIsbn} en tap-commerce...`);
+          const tapUrl = `https://contentv2.tap-commerce.com/cover/large/${cleanIsbn}_1.jpg?id_com=717`;
+          const tapRes = await fetch(tapUrl, { method: 'HEAD' });
+          const itemFound = tapRes.headers.get('itemfound');
+          if (tapRes.ok && itemFound !== 'False') {
+            portadaUrl = tapUrl;
+            console.log(`Portada encontrada en tap-commerce: ${portadaUrl}`);
+          } else {
+            console.log('No se encontró portada en tap-commerce.');
+          }
+        } catch (error: any) {
+          console.error('Error al verificar portada en tap-commerce:', error?.message || error);
+        }
+      }
+
+      // 6. Último recurso: si ninguna API tiene los datos pero tap-commerce tiene
+      // la portada, devolver al menos eso (útil para el botón "Buscar portada").
+      if (!found) {
+        try {
+          const tapUrl = `https://contentv2.tap-commerce.com/cover/large/${cleanIsbn}_1.jpg?id_com=717`;
+          const tapRes = await fetch(tapUrl, { method: 'HEAD' });
+          if (tapRes.ok && tapRes.headers.get('itemfound') !== 'False') {
+            console.log(`Solo portada encontrada en tap-commerce para ISBN ${cleanIsbn}`);
+            return {
+              titulo: '', autor: '', colaboradores: '', anioPublicacion: '',
+              editorial: '', lugarPublicacion: '', edicion: '', portadaUrl: tapUrl,
+              descripcionFisica: '', idioma: '', temas: '',
+            };
+          }
+        } catch (error: any) {
+          console.error('Error en fallback final de tap-commerce:', error?.message || error);
         }
       }
 
