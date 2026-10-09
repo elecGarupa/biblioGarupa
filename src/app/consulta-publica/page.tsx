@@ -5,6 +5,8 @@ import {
   Search,
   BookOpen,
   Library,
+  Lock,
+  ArrowLeft,
   X,
   ChevronLeft,
   ChevronRight,
@@ -42,14 +44,31 @@ export default function ConsultaPublica() {
       {/* Hero */}
       <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white">
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl overflow-hidden flex items-center justify-center p-1">
-              <img src="/logo.png" alt="BiblioGarupa" className="w-full h-full object-contain" />
+          <a
+            href="/login"
+            title="Acceso administrativo"
+            className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all mb-4"
+          >
+            <ArrowLeft size={18} />
+          </a>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white rounded-2xl overflow-hidden flex items-center justify-center p-1 shadow-lg flex-shrink-0">
+                <img src="/logo.png" alt="BiblioGarupa" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tight">BiblioGarupa</h1>
+                <p className="text-indigo-200 font-bold text-sm uppercase tracking-widest mt-1">Catálogo Público</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight">BiblioGarupa</h1>
-              <p className="text-indigo-200 font-bold text-sm uppercase tracking-widest mt-1">Catálogo Público</p>
-            </div>
+            <a
+              href="/login"
+              title="Acceso administrativo"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 font-bold text-sm transition-all flex-shrink-0"
+            >
+              <Lock size={16} />
+              <span>Acceso administrativo</span>
+            </a>
           </div>
           <p className="text-indigo-100 text-lg max-w-xl mt-4">
             Consultá el inventario de la biblioteca, buscá libros y conocé su disponibilidad.
@@ -293,6 +312,9 @@ export default function ConsultaPublica() {
           <p className="text-sm font-bold text-slate-400 dark:text-slate-500">
             BiblioGarupa &mdash; Biblioteca comunitaria
           </p>
+          <a href="/login" className="inline-block mt-2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            Acceso administrativo
+          </a>
         </div>
       </footer>
     </div>
