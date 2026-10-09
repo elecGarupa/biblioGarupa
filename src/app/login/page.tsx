@@ -56,7 +56,7 @@ export default function LoginPage() {
           </div>
           <div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">Biblio Garupá</h1>
-            <p className="text-2xl font-black text-indigo-600 tracking-tight mt-1">SGB</p>
+            <p className="text-2xl font-black text-indigo-600 tracking-tight mt-1 text-center">SGB</p>
           </div>
         </div>
         <p className="text-center text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs mt-4 mb-8">Acceso Administrativo</p>
