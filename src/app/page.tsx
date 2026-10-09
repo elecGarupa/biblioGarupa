@@ -65,10 +65,10 @@ export default function Dashboard() {
         </div>
 
         {/* Vencimientos próximos */}
-        <section className="bg-white dark:bg-slate-800 rounded-[2rem] border border-amber-200 dark:border-amber-500/20 p-4 md:p-8 shadow-xl shadow-amber-100/30 dark:shadow-black/50">
+        <section className="group bg-white dark:bg-slate-800 rounded-[2rem] border border-amber-200 dark:border-amber-500/20 p-4 md:p-8 shadow-xl shadow-amber-100/30 dark:shadow-black/50 hover:border-amber-400 dark:hover:border-amber-500/60 hover:shadow-amber-200 dark:hover:shadow-amber-500/20 transition-all duration-500">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
-              <AlertCircle className="text-amber-600" size={22} />
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <AlertCircle className="text-amber-600 group-hover:animate-pulse" size={22} />
             </div>
             <div>
               <h2 className="text-xl font-black text-slate-900 dark:text-white font-display">
@@ -185,7 +185,7 @@ function MetricCard({ title, value, icon, color, label, isLoading }: any) {
   };
 
   return (
-    <div className={`p-4 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-700 relative overflow-hidden group hover:shadow-2xl dark:hover:shadow-indigo-500/20 transition-all duration-500 shadow-sm dark:shadow-black/50 bg-white dark:bg-slate-800`}>
+    <div className={`p-4 md:p-8 rounded-[2rem] border border-slate-100 dark:border-slate-700 relative overflow-hidden group hover:shadow-2xl hover:border-indigo-300 dark:hover:border-indigo-500 dark:hover:shadow-indigo-500/20 transition-all duration-500 shadow-sm dark:shadow-black/50 bg-white dark:bg-slate-800`}>
       <div className="relative z-10">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg rotate-3 group-hover:rotate-0 transition-transform duration-500 ${colorStyles[color].split(' ')[0]}`}>
           {icon}
